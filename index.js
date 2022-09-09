@@ -78,7 +78,7 @@ let minoes = {
             [1, 1, 0],
             [0, 0, 0]
         ]
-    }, 
+    },
     z: {
         name: 'Z',
         color: '#F00001',
@@ -190,6 +190,9 @@ function colorSquare(col, row, color) {
     pixel.style.width = `${100 / dims.width}%`;
     pixel.style.height = `100%`;
 
+    pixel.innerHTML = '';
+    pixel.style.backgroundColor = color;
+
     if (color != '#333333') {
         if (pixel.children.length == 0) {
             let mino = document.createElement('div');
@@ -200,9 +203,6 @@ function colorSquare(col, row, color) {
         }
 
         pixel.style.backgroundColor = shadeColor(color, -40);
-    } else {
-        pixel.innerHTML = '';
-        pixel.style.backgroundColor = color;
     }
 }
 
@@ -234,15 +234,20 @@ function movePiece(x, y) {
 
         if (!board[newY] || board[newY][newX]) {
             if (y != 0) {
-                for (let i = 0; i < piece.indices.length; i++) {
-                    board[piece.indices[i][0]][piece.indices[i][1]] = piece.color;
-                    if (!board[piece.indices[i][0]].includes(undefined)) {
-                        if (!game.linesCleared.includes(piece.indices[i][0])) {
-                            game.linesCleared.push(piece.indices[i][0]);
+                if (game.placeBuffer) {
+                    for (let i = 0; i < piece.indices.length; i++) {
+                        board[piece.indices[i][0]][piece.indices[i][1]] = piece.color;
+                        if (!board[piece.indices[i][0]].includes(undefined)) {
+                            if (!game.linesCleared.includes(piece.indices[i][0])) {
+                                game.linesCleared.push(piece.indices[i][0]);
+                            }
                         }
                     }
+                    piece = undefined;
+                    game.placeBuffer--;
+                } else {
+                    game.placeBuffer = 1;
                 }
-                piece = undefined;
             }
             return;
         } else if (newX < 0 || newX > dims.width - 1) {
@@ -250,6 +255,8 @@ function movePiece(x, y) {
         }
         newIndices.push([newY, newX]);
     }
+
+    if (game.placeBuffer) game.placeBuffer--;
 
     piece.indices = newIndices;
     piece.center[0] += y;
@@ -288,6 +295,7 @@ let game = {
     timer: 0,
     speed: 2,
     linesCleared: [],
+    placeBuffer: 0,
     control: {
         up: {
             pressed: 0
@@ -376,6 +384,7 @@ let gameLoop = setInterval(() => {
         }
         drawBoard();
     } else {
+        game.linesCleared.sort((a, b) => (a - b));
         for (let i = 0; i < game.linesCleared.length; i++) {
             board[game.linesCleared[i]].fill(undefined);
             
@@ -388,3 +397,7 @@ let gameLoop = setInterval(() => {
         game.linesCleared = [];
     }
 }, 1000 / 60);
+
+/*
+make piece solidification take longer
+*/

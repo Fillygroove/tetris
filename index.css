@@ -195,7 +195,7 @@ ul, ol {
 }
 
 #board {
-    background-color: #ff0;
+    background-color: #333333;
     position: relative;
     left: 50%;
     translate: -50%;
@@ -204,7 +204,7 @@ ul, ol {
 }
 
 .game-row {
-    background-color: #f00;
+    background-color: #333333;
 }
 
 .game-col {
