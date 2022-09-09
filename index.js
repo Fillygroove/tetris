@@ -306,8 +306,9 @@ let game = {
     linesCleared: [],
     placeBuffer: 0,
     control: {
-        up: {
-            pressed: 0
+        hdrop: {
+            pressed: 0,
+            buffer: 0
         },
         down: {
             pressed: 0
@@ -328,7 +329,7 @@ let game = {
         }
     },
     config: { // separated from control to allow for later customization
-        up: 'w',
+        hdrop: 'w',
         left: 'a',
         right: 'd',
         down: 's',
@@ -385,7 +386,7 @@ let gameLoop = setInterval(() => {
                     case 'down':
                         movePiece(0, 1);
                         break;
-                    case 'up':
+                    case 'hdrop':
                         while (piece) movePiece(0, 1);
                         break;
                     case 'cw':
