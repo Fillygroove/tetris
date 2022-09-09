@@ -104,7 +104,7 @@ let minoes = {
             [1, 1],
             [1, 1]
         ]
-    },
+    }/*,
     wtf: {
         name: 'wtf',
         color: '#F0007F',
@@ -115,7 +115,7 @@ let minoes = {
             [1, 1, 0, 0, 0],
             [1, 0, 0, 0, 0]
         ]
-    }
+    }*/
 };
 
 let minoArray = Object.values(minoes);
