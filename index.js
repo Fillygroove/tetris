@@ -104,7 +104,16 @@ let minoes = {
             [1, 1],
             [1, 1]
         ]
-    }/*,
+    }/*, 
+    o: { // This version of the o piece allows for o-spins
+        name: 'O',
+        color: '#F1F000',
+        shape: [
+            [0, 1, 1],
+            [0, 1, 1],
+            [0, 0, 0]
+        ]
+    }*//*,
     wtf: {
         name: 'wtf',
         color: '#F0007F',
@@ -349,10 +358,13 @@ document.addEventListener("keyup", (e) => {
 let gameLoop = setInterval(() => {
     if (game.linesCleared.length == 0) {
         if (!piece) setPiece(minoArray[Math.floor(Math.random() * minoArray.length)]);
+
         game.timer = (game.timer + 1) % 60;
+
         if (game.timer % Math.round(60 / game.speed) == 0) {
             movePiece(0, 1);
         }
+
         if (game.done) clearInterval(gameLoop);
 
         for (let control in game.control) {
@@ -372,6 +384,9 @@ let gameLoop = setInterval(() => {
                         break;
                     case 'down':
                         movePiece(0, 1);
+                        break;
+                    case 'up':
+                        while (piece) movePiece(0, 1);
                         break;
                     case 'cw':
                         rotatePiece(1);
@@ -397,7 +412,3 @@ let gameLoop = setInterval(() => {
         game.linesCleared = [];
     }
 }, 1000 / 60);
-
-/*
-make piece solidification take longer
-*/
