@@ -10,12 +10,14 @@ let dims = {
     size: 500
 };
 
+let wrapper = document.getElementById('wrapper');
 let divBoard = document.getElementById('board');
-let boardWidth = dims.size * dims.width / dims.height;
-let boardHeight = dims.size;
+let pauseDiv = document.getElementById('pause');
+let wrapperWidth = dims.size * dims.width / dims.height;
+let wrapperHeight = dims.size;
 
-divBoard.style.width = `${boardWidth}px`;
-divBoard.style.height = `${boardHeight}px`;
+wrapper.style.width = `${wrapperWidth}px`;
+wrapper.style.height = `${wrapperHeight}px`;
 
 for (let i = 0; i < dims.height; i++) {
     let row = document.createElement('div');
@@ -215,6 +217,14 @@ function colorSquare(col, row, color) {
     }
 }
 
+function eraseBoard() {
+    for (let i = 0; i < dims.height; i++) {
+        for (let j = 0; j < dims.width; j++) {
+            colorSquare(i, j, '#333333');
+        }
+    }
+}
+
 function drawBoard() {
     for (let i = 0; i < dims.height; i++) {
         for (let j = 0; j < dims.width; j++) {
@@ -305,6 +315,7 @@ let game = {
     speed: 2,
     linesCleared: [],
     placeBuffer: 0,
+    paused: false,
     control: {
         hdrop: {
             pressed: 0,
@@ -326,6 +337,10 @@ let game = {
         cw: {
             pressed: 0,
             buffer: 0
+        },
+        pause: {
+            pressed: 0,
+            buffer: 0
         }
     },
     config: { // separated from control to allow for later customization
@@ -334,7 +349,8 @@ let game = {
         right: 'd',
         down: 's',
         ccw: 'j',
-        cw: 'k'
+        cw: 'k',
+        pause: 'Enter'
     }
 };
 
@@ -357,59 +373,82 @@ document.addEventListener("keyup", (e) => {
 });
 
 let gameLoop = setInterval(() => {
-    if (game.linesCleared.length == 0) {
-        if (!piece) setPiece(minoArray[Math.floor(Math.random() * minoArray.length)]);
-
-        game.timer = (game.timer + 1) % 60;
-
-        if (game.timer % Math.round(60 / game.speed) == 0) {
-            movePiece(0, 1);
-        }
-
-        if (game.done) clearInterval(gameLoop);
-
-        for (let control in game.control) {
-            if (game.control[control].pressed) {
-                game.control[control].pressed = 0;
-                
-                if (game.control[control].buffer != undefined) {
-                    game.control[control].buffer = 1;
-                }
-
-                switch (control) {
-                    case 'left':
-                        movePiece(-1, 0);
-                        break;
-                    case 'right':
-                        movePiece(1, 0);
-                        break;
-                    case 'down':
-                        movePiece(0, 1);
-                        break;
-                    case 'hdrop':
-                        while (piece) movePiece(0, 1);
-                        break;
-                    case 'cw':
-                        rotatePiece(1);
-                        break;
-                    case 'ccw':
-                        rotatePiece(-1);
-                        break;
-                }
-            }
-        }
-        drawBoard();
-    } else {
-        game.linesCleared.sort((a, b) => (a - b));
-        for (let i = 0; i < game.linesCleared.length; i++) {
-            board[game.linesCleared[i]].fill(undefined);
+    if (game.paused) {
+        if (game.control.pause.pressed) {
+            game.control.pause.pressed = 0;
             
-            for (let j = game.linesCleared[i] - 1; j > -1; j--) {
-                for (let k = 0; k < board[j].length; k++) board[j + 1][k] = board[j][k]; 
-                board[j].fill(undefined);
+            if (game.control.pause.buffer != undefined) {
+                game.control.pause.buffer = 1;
             }
+
+            game.paused = false;
+            pauseDiv.innerHTML = '';
         }
-        drawBoard();
-        game.linesCleared = [];
+    } else {
+        if (game.linesCleared.length == 0) {
+            if (!piece) setPiece(minoArray[Math.floor(Math.random() * minoArray.length)]);
+
+            game.timer = (game.timer + 1) % 60;
+
+            if (game.timer % Math.round(60 / game.speed) == 0) {
+                movePiece(0, 1);
+            }
+
+            drawBoard();
+            
+            if (game.done) clearInterval(gameLoop);
+
+            for (let control in game.control) {
+                if (game.control[control].pressed) {
+                    game.control[control].pressed = 0;
+                    
+                    if (game.control[control].buffer != undefined) {
+                        game.control[control].buffer = 1;
+                    }
+
+                    switch (control) {
+                        case 'left':
+                            movePiece(-1, 0);
+                            break;
+                        case 'right':
+                            movePiece(1, 0);
+                            break;
+                        case 'down':
+                            movePiece(0, 1);
+                            break;
+                        case 'hdrop':
+                            while (piece) movePiece(0, 1);
+                            break;
+                        case 'cw':
+                            rotatePiece(1);
+                            break;
+                        case 'ccw':
+                            rotatePiece(-1);
+                            break;
+                        case 'pause':
+                            eraseBoard();
+                            pauseDiv.innerHTML = 'Paused!';
+                            game.paused = true;
+                            break;
+                    }
+                }
+            }
+        } else {
+            game.linesCleared.sort((a, b) => (a - b));
+            for (let i = 0; i < game.linesCleared.length; i++) {
+                board[game.linesCleared[i]].fill(undefined);
+                
+                for (let j = game.linesCleared[i] - 1; j > -1; j--) {
+                    for (let k = 0; k < board[j].length; k++) board[j + 1][k] = board[j][k]; 
+                    board[j].fill(undefined);
+                }
+            }
+            drawBoard();
+            game.linesCleared = [];
+        }
     }
 }, 1000 / 60);
+
+/*
+add restart functionality
+*/
