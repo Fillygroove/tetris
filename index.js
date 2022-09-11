@@ -250,7 +250,6 @@ function setPiece(minoIndex) {
 }
 
 function rotatePiece(dir, check = 0) {
-    erasePiece();
 
     // If I just redefined the piece indices, the code breaks; I do not know why. 
     let newIndices = [];
@@ -281,20 +280,18 @@ function rotatePiece(dir, check = 0) {
         ) {
             // Do not rotate
             // Implement TTC SRS by adjusting the centerpoint, allowing for four extra checks
-            drawPiece();
             return;
         }
 
         newIndices.push(indexArray);
     }
 
+    erasePiece();
     piece.indices = newIndices;
     drawPiece();
 }
 
 function movePiece(x, y) {
-    erasePiece();
-
     let newIndices = [];
 
     for (let i = 0; i < piece.indices.length; i++) {
@@ -314,21 +311,21 @@ function movePiece(x, y) {
                             }
                         }
                     }
-                    drawPiece();
                     piece = undefined;
                     game.placeBuffer--;
                 } else {
                     game.placeBuffer = 1;
                 }
             }
-            if (piece) drawPiece();
             return;
         } else if (newX < 0 || newX > game.dims.width - 1) {
-            drawPiece();
+            
             return;
         }
         newIndices.push([newY, newX]);
     }
+
+    erasePiece();
 
     if (game.placeBuffer) game.placeBuffer--;
 
