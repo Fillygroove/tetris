@@ -289,6 +289,8 @@ function setPiece(minoIndex) {
 }
 
 function rotatePiece(dir, check = 0) {
+    erasePiece();
+
     // If I just redefined the piece indices, the code breaks; I do not know why. 
     let newIndices = [];
 
@@ -318,14 +320,16 @@ function rotatePiece(dir, check = 0) {
         ) {
             // Do not rotate
             // Implement TTC SRS by adjusting the centerpoint, allowing for four extra checks
+            
+            drawPiece();
             return;
         }
 
         newIndices.push(indexArray);
     }
 
-    erasePiece();
     piece.indices = newIndices;
+
     drawPiece();
 }
 
@@ -351,6 +355,7 @@ function movePiece(x, y) {
                     }
                     piece = undefined;
                     game.placeBuffer = 0;
+                    game.timer = 0;
                 } else {
                     game.placeBuffer = 1;
                 }
@@ -369,7 +374,7 @@ function movePiece(x, y) {
     piece.indices = newIndices;
     piece.center[0] += y;
     piece.center[1] += x;
-
+    
     drawPiece();
 }
 
@@ -410,6 +415,17 @@ let gameLoop = setInterval(() => {
             // If the game is completed, stop the loop
             if (game.done) clearInterval(gameLoop);
 
+            if (!piece) setPiece(Math.floor(Math.random() * game.minoes.length));
+            else {
+                // Increment the timer
+                game.timer = (game.timer + 1) % 60;
+
+                // Move the piece down from time to time
+                if (game.timer % Math.round(60 / game.speed) == 0) {
+                    movePiece(0, 1);
+                }
+            }
+
             // Control manager
             for (let control in game.control) {
                 if (game.control[control].pressed) {
@@ -422,17 +438,6 @@ let gameLoop = setInterval(() => {
                     game.control[control].execute();
                     break;
                 }
-            }
-
-            // If there is no piece, add one
-            if (!piece) setPiece(Math.floor(Math.random() * game.minoes.length));
-
-            // Increment the timer
-            game.timer = (game.timer + 1) % 60;
-
-            // Move the piece down from time to time
-            if (game.timer % Math.round(60 / game.speed) == 0) {
-                movePiece(0, 1);
             }
         } else {
             // Sort line indices from smallest to largest; Ensures that no bugs happen when the above lines are dropped down
