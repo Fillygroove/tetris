@@ -81,40 +81,77 @@ let game = {
             [1, 1, 0, 0, 0],
             [1, 0, 0, 0, 0]
         ]
+    }*//*, {
+        name: 'Heaven Piece',
+        color: '#FFFFFF',
+        shape: [
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        ]
     }*/],
     dims: {
         width: 10,
         height: 20
     },
     control: {
+        left: {
+            execute: () => {
+                movePiece(-1, 0);
+            },
+            key: 'a',
+            pressed: 0
+        },
+        right: {
+            execute: () => {
+                movePiece(1, 0);
+            },
+            key: 'd',
+            pressed: 0
+        },
         hdrop: {
+            execute: () => {
+                while (piece) movePiece(0, 1);
+            },
             key: 'w',
             pressed: 0,
             buffer: 0
         },
         down: {
+            execute: () => {
+                movePiece(0, 1);
+            },
             key: 's',
             pressed: 0
         },
-        left: {
-            key: 'a',
-            pressed: 0
-        },
-        right: {
-            key: 'd',
-            pressed: 0
-        },
         ccw: {
+            execute: () => {
+                rotatePiece(-1);
+            },
             key: 'j',
             pressed: 0,
             buffer: 0
         },
         cw: {
+            execute: () => {
+                rotatePiece(1);
+            },
             key: 'k',
             pressed: 0,
             buffer: 0
         },
         pause: {
+            execute: () => {
+                pauseDiv.innerHTML = 'Paused!';
+                game.paused = true;
+            },
             key: 'Enter',
             pressed: 0,
             buffer: 0
@@ -149,6 +186,8 @@ for (let i = 0; i < game.dims.height; i++) {
 
     divBoard.append(row);
 }
+
+let blankRow = divBoard.children[0].innerHTML;
 
 let board = ((out = []) => {
     for (let i = 0; i < game.dims.height; i++) {
@@ -250,7 +289,6 @@ function setPiece(minoIndex) {
 }
 
 function rotatePiece(dir, check = 0) {
-
     // If I just redefined the piece indices, the code breaks; I do not know why. 
     let newIndices = [];
 
@@ -292,15 +330,15 @@ function rotatePiece(dir, check = 0) {
 }
 
 function movePiece(x, y) {
+    erasePiece();
     let newIndices = [];
 
     for (let i = 0; i < piece.indices.length; i++) {
         let newY = piece.indices[i][0] + y;
         let newX = piece.indices[i][1] + x;
 
-        // to-do: make it so that only downward collisions create a new piece
-
         if (!board[newY] || board[newY][newX]) {
+            drawPiece();
             if (y != 0) {
                 if (game.placeBuffer) {
                     for (let i = 0; i < piece.indices.length; i++) {
@@ -312,22 +350,21 @@ function movePiece(x, y) {
                         }
                     }
                     piece = undefined;
-                    game.placeBuffer--;
+                    game.placeBuffer = 0;
                 } else {
                     game.placeBuffer = 1;
                 }
             }
             return;
         } else if (newX < 0 || newX > game.dims.width - 1) {
-            
+            drawPiece();
             return;
         }
+
         newIndices.push([newY, newX]);
     }
 
-    erasePiece();
-
-    if (game.placeBuffer) game.placeBuffer--;
+    if (game.placeBuffer) game.placeBuffer = 0;
 
     piece.indices = newIndices;
     piece.center[0] += y;
@@ -339,10 +376,13 @@ function movePiece(x, y) {
 document.addEventListener("keydown", (e) => {
     for (let key in game.control) {
         if (game.control[key].key == e.key) {
-            if (!game.control[key].buffer) game.control[key].pressed = 1;
+            if (!game.control[key].buffer) {
+                game.control[key].pressed = 1;
+            }
         }
     }
 });
+
 document.addEventListener("keyup", (e) => {
     for (let key in game.control) {
         if (game.control[key].key == e.key) {
@@ -367,6 +407,23 @@ let gameLoop = setInterval(() => {
         }
     } else {
         if (game.linesCleared.length == 0) {
+            // If the game is completed, stop the loop
+            if (game.done) clearInterval(gameLoop);
+
+            // Control manager
+            for (let control in game.control) {
+                if (game.control[control].pressed) {
+                    game.control[control].pressed = 0;
+                    
+                    if (game.control[control].buffer != undefined) {
+                        game.control[control].buffer = 1;
+                    }
+
+                    game.control[control].execute();
+                    break;
+                }
+            }
+
             // If there is no piece, add one
             if (!piece) setPiece(Math.floor(Math.random() * game.minoes.length));
 
@@ -376,46 +433,6 @@ let gameLoop = setInterval(() => {
             // Move the piece down from time to time
             if (game.timer % Math.round(60 / game.speed) == 0) {
                 movePiece(0, 1);
-            }
-            
-            // If the game is completed, stop the loop
-            if (game.done) clearInterval(gameLoop);
-
-            // Control manager
-            // to do: make it so that this doesn't run if there isn't a piece (or, alternatively, move the piece down last)
-            for (let control in game.control) {
-                if (game.control[control].pressed) {
-                    game.control[control].pressed = 0;
-                    
-                    if (game.control[control].buffer != undefined) {
-                        game.control[control].buffer = 1;
-                    }
-
-                    switch (control) {
-                        case 'left':
-                            movePiece(-1, 0);
-                            break;
-                        case 'right':
-                            movePiece(1, 0);
-                            break;
-                        case 'down':
-                            movePiece(0, 1);
-                            break;
-                        case 'hdrop':
-                            while (piece) movePiece(0, 1);
-                            break;
-                        case 'cw':
-                            rotatePiece(1);
-                            break;
-                        case 'ccw':
-                            rotatePiece(-1);
-                            break;
-                        case 'pause':
-                            pauseDiv.innerHTML = 'Paused!';
-                            game.paused = true;
-                            break;
-                    }
-                }
             }
         } else {
             // Sort line indices from smallest to largest; Ensures that no bugs happen when the above lines are dropped down
@@ -427,11 +444,14 @@ let gameLoop = setInterval(() => {
 
                 // Move everything from above that line down
                 for (let j = game.linesCleared[i] - 1; j > -1; j--) {
+                    divBoard.children[j + 1].innerHTML = divBoard.children[j].innerHTML;
+                    divBoard.children[j].innerHTML = blankRow;
+
+                    // Shallow copies suck.
                     for (let k = 0; k < board[j].length; k++) {
                         board[j + 1][k] = board[j][k];
-                        drawPixel(j + 1, k, board[j + 1][k] || '#333333');
-                        drawPixel(j, k, '#333333');
                     }
+
                     board[j].fill(undefined);
                 }
             }
