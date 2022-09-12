@@ -1,12 +1,4 @@
 let game = {
-    done: undefined,
-    level: 0,
-    lines: 0,
-    timer: 0,
-    speed: 2,
-    linesCleared: [],
-    placeBuffer: 0,
-    paused: false,
     minoes: [{
         name: 'I',
         color: '#00F0F1',
@@ -118,7 +110,7 @@ let game = {
         },
         hdrop: {
             execute: () => {
-                while (piece) movePiece(0, 1);
+                while (game.piece) movePiece(0, 1);
             },
             key: 'w',
             pressed: 0,
@@ -149,6 +141,7 @@ let game = {
         },
         pause: {
             execute: () => {
+                divBoard.style.visibility = 'hidden';
                 pauseDiv.innerHTML = 'Paused!';
                 game.paused = true;
             },
@@ -156,11 +149,20 @@ let game = {
             pressed: 0,
             buffer: 0
         }
-    }
+    },
+    linesCleared: [],
+    piece: undefined,
+    bag: undefined,
+    hold: undefined,
+    done: undefined,
+    paused: false,
+    placeBuffer: 0,
+    timer: 0,
+    speed: 2,
 };
 
 let boardSize = 500;
-let wrapper = document.getElementById('wrapper');
+let wrapper = document.getElementById('board-wrapper');
 let divBoard = document.getElementById('board');
 let pauseDiv = document.getElementById('pause');
 let wrapperWidth = boardSize * game.dims.width / game.dims.height;
@@ -187,16 +189,14 @@ for (let i = 0; i < game.dims.height; i++) {
     divBoard.append(row);
 }
 
-let blankRow = divBoard.children[0].innerHTML;
-
-let board = ((out = []) => {
+let blankRow = divBoard.children[0].innerHTML; 
+let board = ((out = []) => { // Merge this with the game object
     for (let i = 0; i < game.dims.height; i++) {
         out.push(new Array(game.dims.width).fill(undefined));
     }
     
     return out;
 })();
-let piece;
 
 function print(arr) {
     let out = ''
@@ -204,7 +204,6 @@ function print(arr) {
     console.log(out);
 }
 
-// Literally just stolen from stackoverflow lol
 function shadeColor(color, percent) {
     var R = parseInt(color.substring(1,3),16);
     var G = parseInt(color.substring(3,5),16);
@@ -225,11 +224,11 @@ function shadeColor(color, percent) {
     return "#"+RR+GG+BB;
 }
 
-function drawPixel(col, row, color) {
+function drawPixel(col, row, color, place = divBoard, width = 100 / game.dims.width) {
     // Find the pixel and give it proper attributes
-    let pixel = divBoard.children[col].children[row];
+    let pixel = place.children[col].children[row];
     pixel.className = 'game-col';
-    pixel.style.width = `${100 / game.dims.width}%`;
+    pixel.style.width = `${width}%`;
 
     // Kill the child.
     pixel.innerHTML = '';
@@ -250,14 +249,14 @@ function drawPixel(col, row, color) {
 }
 
 function erasePiece() {
-    for (let indices of piece.indices) {
+    for (let indices of game.piece.indices) {
         drawPixel(indices[0], indices[1], '#333333');
     }
 }
 
 function drawPiece() {
-    for (let indices of piece.indices) {
-        drawPixel(indices[0], indices[1], piece.color);
+    for (let indices of game.piece.indices) {
+        drawPixel(indices[0], indices[1], game.piece.color);
     }
 }
 
@@ -265,7 +264,7 @@ function setPiece(minoIndex) {
     let mino = game.minoes[minoIndex];
     let leftmost = Math.floor((game.dims.width - mino.shape.length) / 2);
 
-    piece = {
+    game.piece = {
         color: mino.color,
         indices: ((out = []) => {
             for (let i = 0; i < mino.shape.length; i++) {
@@ -294,10 +293,10 @@ function rotatePiece(dir, check = 0) {
     // If I just redefined the piece indices, the code breaks; I do not know why. 
     let newIndices = [];
 
-    for (let i = 0; i < piece.indices.length; i++) {
+    for (let i = 0; i < game.piece.indices.length; i++) {
         // Move the x and y positions of the indices to (0, 0) instead of their current center
-        let y = piece.indices[i][0] - piece.center[0];
-        let x = piece.indices[i][1] - piece.center[1];
+        let y = game.piece.indices[i][0] - game.piece.center[0];
+        let x = game.piece.indices[i][1] - game.piece.center[1];
         
         // Calculate how far away they are from the center and what angle they're at from the center
         let scale = Math.sqrt(y * y + x * x);
@@ -305,8 +304,8 @@ function rotatePiece(dir, check = 0) {
 
         // Rotate the x and the y pieces clockwise or widdershins
         let indexArray = [
-            Math.round(scale * Math.cos(angle - dir * Math.PI / 2) + piece.center[0]), 
-            Math.round(scale * Math.sin(angle - dir * Math.PI / 2) + piece.center[1])
+            Math.round(scale * Math.cos(angle - dir * Math.PI / 2) + game.piece.center[0]), 
+            Math.round(scale * Math.sin(angle - dir * Math.PI / 2) + game.piece.center[1])
         ];
 
         if (
@@ -328,7 +327,7 @@ function rotatePiece(dir, check = 0) {
         newIndices.push(indexArray);
     }
 
-    piece.indices = newIndices;
+    game.piece.indices = newIndices;
 
     drawPiece();
 }
@@ -337,23 +336,23 @@ function movePiece(x, y) {
     erasePiece();
     let newIndices = [];
 
-    for (let i = 0; i < piece.indices.length; i++) {
-        let newY = piece.indices[i][0] + y;
-        let newX = piece.indices[i][1] + x;
+    for (let i = 0; i < game.piece.indices.length; i++) {
+        let newY = game.piece.indices[i][0] + y;
+        let newX = game.piece.indices[i][1] + x;
 
         if (!board[newY] || board[newY][newX]) {
             drawPiece();
             if (y != 0) {
                 if (game.placeBuffer) {
-                    for (let i = 0; i < piece.indices.length; i++) {
-                        board[piece.indices[i][0]][piece.indices[i][1]] = piece.color;
-                        if (!board[piece.indices[i][0]].includes(undefined)) {
-                            if (!game.linesCleared.includes(piece.indices[i][0])) {
-                                game.linesCleared.push(piece.indices[i][0]);
+                    for (let i = 0; i < game.piece.indices.length; i++) {
+                        board[game.piece.indices[i][0]][game.piece.indices[i][1]] = game.piece.color;
+                        if (!board[game.piece.indices[i][0]].includes(undefined)) {
+                            if (!game.linesCleared.includes(game.piece.indices[i][0])) {
+                                game.linesCleared.push(game.piece.indices[i][0]);
                             }
                         }
                     }
-                    piece = undefined;
+                    game.piece = undefined;
                     game.placeBuffer = 0;
                     game.timer = 0;
                 } else {
@@ -371,9 +370,9 @@ function movePiece(x, y) {
 
     if (game.placeBuffer) game.placeBuffer = 0;
 
-    piece.indices = newIndices;
-    piece.center[0] += y;
-    piece.center[1] += x;
+    game.piece.indices = newIndices;
+    game.piece.center[0] += y;
+    game.piece.center[1] += x;
     
     drawPiece();
 }
@@ -407,6 +406,7 @@ let gameLoop = setInterval(() => {
                 game.control.pause.buffer = 1;
             }
 
+            divBoard.style.visibility = '';
             game.paused = false;
             pauseDiv.innerHTML = '';
         }
@@ -415,7 +415,7 @@ let gameLoop = setInterval(() => {
             // If the game is completed, stop the loop
             if (game.done) clearInterval(gameLoop);
 
-            if (!piece) setPiece(Math.floor(Math.random() * game.minoes.length));
+            if (!game.piece) setPiece(Math.floor(Math.random() * game.minoes.length));
             else {
                 // Increment the timer
                 game.timer = (game.timer + 1) % 60;
@@ -465,3 +465,4 @@ let gameLoop = setInterval(() => {
         }
     }
 }, 1000 / 60);
+

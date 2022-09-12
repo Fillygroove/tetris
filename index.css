@@ -188,20 +188,21 @@ ul, ol {
 
 #game {
     width: 95%;
-    height: 100%;
+    height: 510px;
     background-color: #a769b1;
     border-radius: 5px;
     border: #59385e 2px solid;
     padding: 10px 0;
 }
 
-#wrapper {
+#board-wrapper {
     background-color: #333333;
-    position: relative;
-    left: 50%;
-    translate: -50%;
+    position: absolute;
     border: #222 2px solid;
     border-radius: 5px;
+    display: inline-block;
+    left: 50%;
+    translate: -50%;
 }
 
 #board {
@@ -244,4 +245,9 @@ ul, ol {
     translate: -50% -50%;
     width: 75%;
     height: 75%;
+}
+
+#game-wrapper {
+    height: 100%;
+    display: block;
 }
