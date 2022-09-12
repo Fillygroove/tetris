@@ -237,6 +237,7 @@ ul, ol {
     top: 50%;
     translate: 0 -50%;
     position:  relative;
+    user-select: none;
 }
 
 .game-row {
