@@ -142,7 +142,7 @@ let game = {
         pause: {
             execute: () => {
                 divBoard.style.visibility = 'hidden';
-                pauseDiv.innerHTML = 'Paused!';
+                pauseDiv.style.visibility = 'visible';
                 game.paused = true;
             },
             key: 'Enter',
@@ -162,14 +162,10 @@ let game = {
 };
 
 let boardSize = 500;
-let wrapper = document.getElementById('board-wrapper');
 let divBoard = document.getElementById('board');
 let pauseDiv = document.getElementById('pause');
 let wrapperWidth = boardSize * game.dims.width / game.dims.height;
 let wrapperHeight = boardSize;
-
-wrapper.style.width = `${wrapperWidth}px`;
-wrapper.style.height = `${wrapperHeight}px`;
 
 for (let i = 0; i < game.dims.height; i++) {
     let row = document.createElement('div');
@@ -406,9 +402,9 @@ let gameLoop = setInterval(() => {
                 game.control.pause.buffer = 1;
             }
 
-            divBoard.style.visibility = '';
+            divBoard.style.visibility = 'visible';
+            pauseDiv.style.visibility = 'hidden';
             game.paused = false;
-            pauseDiv.innerHTML = '';
         }
     } else {
         if (game.linesCleared.length == 0) {
