@@ -55,7 +55,7 @@ let game = {
             [1, 1],
             [1, 1]
         ]
-    }, {
+    }/*, {
         name: 'K',
         color: ['#ED709D'],
         shape: [
@@ -163,7 +163,7 @@ let game = {
             [1, 2, 4],
             [0, 0, 0]
         ]
-    }],
+    }*/],
     dims: {
         width: 10,
         height: 20
