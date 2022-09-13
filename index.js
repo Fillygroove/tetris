@@ -55,17 +55,26 @@ let game = {
             [1, 1],
             [1, 1]
         ]
+    }, {
+        name: 'K',
+        color: ['#ED709D'],
+        shape: [
+            [1, 0, 0, 0],
+            [1, 0, 1, 0],
+            [1, 1, 0, 0],
+            [1, 0, 1, 0]
+        ]
     }/*, { // This version of the o piece allows for o-spins
         name: 'O',
-        color: '#F1F000',
+        color: ['#F1F000'],
         shape: [
             [0, 1, 1],
             [0, 1, 1],
             [0, 0, 0]
         ]
-    }*//*, {
+    }, {
         name: 'wtf',
-        color: '#F0007F',
+        color: ['#F0007F'],
         shape: [
             [0, 1, 1, 1, 0],
             [1, 1, 0, 1, 0],
@@ -73,9 +82,9 @@ let game = {
             [1, 1, 0, 0, 0],
             [1, 0, 0, 0, 0]
         ]
-    }*//*, {
+    }, {
         name: 'Heaven Piece',
-        color: '#FFFFFF',
+        color: ['#FFFFFF'],
         shape: [
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -88,7 +97,7 @@ let game = {
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         ]
-    }*//*, {
+    }, {
         name: 'Diep',
         color: ['#14ACD4', '#959595'],
         shape: [
@@ -97,7 +106,7 @@ let game = {
             [1, 1, 1, 2],
             [1, 1, 1, 0]
         ]
-    }*//*{
+    }, {
         name: 'Broque Monsieur',
         color: ['#0DFF72'],
         shape: [
@@ -137,7 +146,7 @@ let game = {
 			[1, 1, 1, 1, 1, 0],
 			[1, 1, 0, 1, 1, 0],
         ]
-    }*//*{
+    }, {
         name: `Drifter's Piece`,
         color: ['#72A8FE'],
         shape: [
@@ -145,6 +154,14 @@ let game = {
             [0, 0, 1, 0],
             [0, 0, 1, 0],
             [1, 0, 0, 0]
+        ]
+    }, {
+        name: 'logo',
+        color: ['#FF8833', '#FF88EE', '#FEFCBB', '#01F001'],
+        shape: [
+            [0, 3, 0],
+            [1, 2, 4],
+            [0, 0, 0]
         ]
     }*/],
     dims: {
