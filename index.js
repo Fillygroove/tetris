@@ -1,7 +1,7 @@
 let game = {
     minoes: [{
         name: 'I',
-        color: '#00F0F1',
+        color: ['#00F0F1'],
         shape: [
             [0, 0, 0, 0],
             [1, 1, 1, 1],
@@ -10,7 +10,7 @@ let game = {
         ]
     }, {
         name: 'J',
-        color: '#0000f0',
+        color: ['#0000f0'],
         shape: [
             [1, 0, 0],
             [1, 1, 1],
@@ -18,7 +18,7 @@ let game = {
         ]
     }, {
         name: 'L',
-        color: '#EF9F00',
+        color: ['#EF9F00'],
         shape: [
             [0, 0, 1],
             [1, 1, 1],
@@ -26,7 +26,7 @@ let game = {
         ]
     }, {
         name: 'S',
-        color: '#01F001',
+        color: ['#01F001'],
         shape: [
             [0, 1, 1],
             [1, 1, 0],
@@ -34,7 +34,7 @@ let game = {
         ]
     }, {
         name: 'Z',
-        color: '#F00001',
+        color: ['#F00001'],
         shape: [
             [1, 1, 0],
             [0, 1, 1],
@@ -42,7 +42,7 @@ let game = {
         ]
     }, {
         name: 'T',
-        color: '#A000F0',
+        color: ['#A000F0'],
         shape: [
             [0, 1, 0],
             [1, 1, 1],
@@ -50,7 +50,7 @@ let game = {
         ]
     }, {
         name: 'O',
-        color: '#F1F000',
+        color: ['#F1F000'],
         shape: [
             [1, 1],
             [1, 1]
@@ -87,6 +87,64 @@ let game = {
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        ]
+    }*//*, {
+        name: 'Diep',
+        color: ['#14ACD4', '#959595'],
+        shape: [
+            [0, 0, 0, 0],
+            [1, 1, 1, 0],
+            [1, 1, 1, 2],
+            [1, 1, 1, 0]
+        ]
+    }*//*{
+        name: 'Broque Monsieur',
+        color: ['#0DFF72'],
+        shape: [
+            [1, 1, 1, 1],
+            [1, 1, 1, 1],
+            [1, 1, 1, 1],
+            [1, 1, 1, 1]
+        ]
+    }, {
+        name: 'Mino',
+        color: ['#FF0D72'],
+        shape: [
+            [1]
+        ]
+    }, {
+        name: 'Linus',
+        color: ['#F538FF'],
+        shape: [
+            [1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ]
+    }, {
+        name: 'Ghostmaster',
+        color: ['#F538FF', '#0DFF72'],
+        shape: [
+			[0, 1, 1, 1, 0, 0],
+			[1, 1, 1, 1, 1, 0],
+			[1, 2, 1, 2, 1, 0],
+			[1, 1, 1, 1, 1, 0],
+			[1, 1, 1, 1, 1, 0],
+			[1, 1, 0, 1, 1, 0],
+        ]
+    }*//*{
+        name: `Drifter's Piece`,
+        color: ['#72A8FE'],
+        shape: [
+            [0, 1, 0, 0],
+            [0, 0, 1, 0],
+            [0, 0, 1, 0],
+            [1, 0, 0, 0]
         ]
     }*/],
     dims: {
@@ -164,8 +222,14 @@ let game = {
 let boardSize = 500;
 let divBoard = document.getElementById('board');
 let pauseDiv = document.getElementById('pause');
-let wrapperWidth = boardSize * game.dims.width / game.dims.height;
-let wrapperHeight = boardSize;
+
+if (game.dims.width > game.dims.height) {
+    divBoard.style.width = pauseDiv.style.width = `100%`;
+    divBoard.style.height = pauseDiv.style.height = `${50 * game.dims.height / game.dims.width}%`;
+} else {
+    divBoard.style.width = pauseDiv.style.width = `${200 * game.dims.width / game.dims.height}%`;
+    divBoard.style.height = pauseDiv.style.height = `100%`;
+}
 
 for (let i = 0; i < game.dims.height; i++) {
     let row = document.createElement('div');
@@ -220,11 +284,11 @@ function shadeColor(color, percent) {
     return "#"+RR+GG+BB;
 }
 
-function drawPixel(col, row, color, place = divBoard, width = 100 / game.dims.width) {
+function drawPixel(col, row, color) {
     // Find the pixel and give it proper attributes
-    let pixel = place.children[col].children[row];
+    let pixel = divBoard.children[col].children[row];
     pixel.className = 'game-col';
-    pixel.style.width = `${width}%`;
+    pixel.style.width = `${100 / game.dims.width}%`;
 
     // Kill the child.
     pixel.innerHTML = '';
@@ -246,13 +310,13 @@ function drawPixel(col, row, color, place = divBoard, width = 100 / game.dims.wi
 
 function erasePiece() {
     for (let indices of game.piece.indices) {
-        drawPixel(indices[0], indices[1], '#333333');
+        drawPixel(indices.col, indices.row, '#333333');
     }
 }
 
 function drawPiece() {
     for (let indices of game.piece.indices) {
-        drawPixel(indices[0], indices[1], game.piece.color);
+        drawPixel(indices.col, indices.row, indices.color);
     }
 }
 
@@ -260,13 +324,18 @@ function setPiece(minoIndex) {
     let mino = game.minoes[minoIndex];
     let leftmost = Math.floor((game.dims.width - mino.shape.length) / 2);
 
+    game.timer = 0;
     game.piece = {
         color: mino.color,
         indices: ((out = []) => {
             for (let i = 0; i < mino.shape.length; i++) {
                 for (let j = 0; j < mino.shape.length; j++) {
                     if (mino.shape[i][j]) {
-                        out.push([i, j + leftmost]);
+                        out.push({
+                            col: i, 
+                            row: j + leftmost,
+                            color: mino.color[mino.shape[i][j] - 1]
+                        });
                         if (board[i][j + leftmost]) game.done = 'lost';
                     }
                 }
@@ -280,6 +349,8 @@ function setPiece(minoIndex) {
         ]
     };
 
+    console.log(game.piece);
+
     drawPiece();
 }
 
@@ -291,25 +362,26 @@ function rotatePiece(dir, check = 0) {
 
     for (let i = 0; i < game.piece.indices.length; i++) {
         // Move the x and y positions of the indices to (0, 0) instead of their current center
-        let y = game.piece.indices[i][0] - game.piece.center[0];
-        let x = game.piece.indices[i][1] - game.piece.center[1];
+        let y = game.piece.indices[i].col - game.piece.center[0];
+        let x = game.piece.indices[i].row - game.piece.center[1];
         
         // Calculate how far away they are from the center and what angle they're at from the center
         let scale = Math.sqrt(y * y + x * x);
         let angle = Math.atan2(x, y);
 
         // Rotate the x and the y pieces clockwise or widdershins
-        let indexArray = [
-            Math.round(scale * Math.cos(angle - dir * Math.PI / 2) + game.piece.center[0]), 
-            Math.round(scale * Math.sin(angle - dir * Math.PI / 2) + game.piece.center[1])
-        ];
+        let indexArray = {
+            col: Math.round(scale * Math.cos(angle - dir * Math.PI / 2) + game.piece.center[0]), 
+            row: Math.round(scale * Math.sin(angle - dir * Math.PI / 2) + game.piece.center[1]),
+            color: game.piece.indices[i].color
+        };
 
         if (
             // The attempted rotation location exists...
-            board[indexArray[0]][indexArray[1]] ||
+            board[indexArray.col][indexArray.row] ||
             // or if that location is out of bounds...
-            indexArray[0] < 0 || indexArray[0] > game.dims.height -1 ||
-            indexArray[1] < 0 || indexArray[1] > game.dims.width -1 ||
+            indexArray.col < 0 || indexArray.col > game.dims.height -1 ||
+            indexArray.row < 0 || indexArray.row > game.dims.width -1 ||
             // or if it didn't pass TTC SRS checks...
             check > 4
         ) {
@@ -333,24 +405,23 @@ function movePiece(x, y) {
     let newIndices = [];
 
     for (let i = 0; i < game.piece.indices.length; i++) {
-        let newY = game.piece.indices[i][0] + y;
-        let newX = game.piece.indices[i][1] + x;
+        let newY = game.piece.indices[i].col + y;
+        let newX = game.piece.indices[i].row + x;
 
         if (!board[newY] || board[newY][newX]) {
             drawPiece();
             if (y != 0) {
                 if (game.placeBuffer) {
                     for (let i = 0; i < game.piece.indices.length; i++) {
-                        board[game.piece.indices[i][0]][game.piece.indices[i][1]] = game.piece.color;
-                        if (!board[game.piece.indices[i][0]].includes(undefined)) {
-                            if (!game.linesCleared.includes(game.piece.indices[i][0])) {
-                                game.linesCleared.push(game.piece.indices[i][0]);
+                        board[game.piece.indices[i].col][game.piece.indices[i].row] = game.piece.color;
+                        if (!board[game.piece.indices[i].col].includes(undefined)) {
+                            if (!game.linesCleared.includes(game.piece.indices[i].col)) {
+                                game.linesCleared.push(game.piece.indices[i].col);
                             }
                         }
                     }
                     game.piece = undefined;
                     game.placeBuffer = 0;
-                    game.timer = 0;
                 } else {
                     game.placeBuffer = 1;
                 }
@@ -361,7 +432,11 @@ function movePiece(x, y) {
             return;
         }
 
-        newIndices.push([newY, newX]);
+        newIndices.push({
+            col: newY,
+            row: newX,
+            color: game.piece.indices[i].color
+        });
     }
 
     if (game.placeBuffer) game.placeBuffer = 0;
@@ -461,4 +536,3 @@ let gameLoop = setInterval(() => {
         }
     }
 }, 1000 / 60);
-
