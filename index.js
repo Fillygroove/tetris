@@ -64,7 +64,7 @@ let game = {
             [1, 1, 0, 0],
             [1, 0, 1, 0]
         ]
-    }/*, { // This version of the o piece allows for o-spins
+    }, { // This version of the o piece allows for o-spins
         name: 'O',
         color: ['#F1F000'],
         shape: [
@@ -163,7 +163,7 @@ let game = {
             [1, 2, 4],
             [0, 0, 0]
         ]
-    }*/],
+    }],
     dims: {
         width: 10,
         height: 20
