@@ -216,9 +216,7 @@ let game = {
         },
         pause: {
             execute: () => {
-                divBoard.style.visibility = 'hidden';
-                pauseDiv.style.visibility = 'visible';
-                game.paused = true;
+                pause();
             },
             key: 'Enter',
             pressed: 0,
@@ -279,6 +277,18 @@ function print(arr) {
     let out = ''
     for (let i = 0; i < arr.length; i++) out += arr[i].toString().replaceAll(',', '\t') + '\n';
     console.log(out);
+}
+
+function pause() {
+    if (!game.paused) {
+        divBoard.style.visibility = 'hidden';
+        pauseDiv.style.visibility = 'visible';
+        game.paused = true;
+    } else {
+        divBoard.style.visibility = 'visible';
+        pauseDiv.style.visibility = 'hidden';
+        game.paused = false;    
+    }
 }
 
 function shadeColor(color, percent) {
@@ -494,9 +504,7 @@ let gameLoop = setInterval(() => {
                 game.control.pause.buffer = 1;
             }
 
-            divBoard.style.visibility = 'visible';
-            pauseDiv.style.visibility = 'hidden';
-            game.paused = false;
+            pause();
         }
     } else {
         if (game.linesCleared.length == 0) {
