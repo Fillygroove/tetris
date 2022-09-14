@@ -216,242 +216,8 @@ function pause() {
     }
 }
 
-function gameInit() {
-    game = {
-        minoes: [{
-            name: 'I',
-            color: ['#00F0F1'],
-            shape: [
-                [0, 0, 0, 0],
-                [1, 1, 1, 1],
-                [0, 0, 0, 0],
-                [0, 0, 0, 0]
-            ]
-        }, {
-            name: 'J',
-            color: ['#0000f0'],
-            shape: [
-                [1, 0, 0],
-                [1, 1, 1],
-                [0, 0, 0],
-            ]
-        }, {
-            name: 'L',
-            color: ['#EF9F00'],
-            shape: [
-                [0, 0, 1],
-                [1, 1, 1],
-                [0, 0, 0],
-            ]
-        }, {
-            name: 'S',
-            color: ['#01F001'],
-            shape: [
-                [0, 1, 1],
-                [1, 1, 0],
-                [0, 0, 0]
-            ]
-        }, {
-            name: 'Z',
-            color: ['#F00001'],
-            shape: [
-                [1, 1, 0],
-                [0, 1, 1],
-                [0, 0, 0]
-            ]
-        }, {
-            name: 'T',
-            color: ['#A000F0'],
-            shape: [
-                [0, 1, 0],
-                [1, 1, 1],
-                [0, 0, 0]
-            ]
-        }, {
-            name: 'O',
-            color: ['#F1F000'],
-            shape: [
-                [1, 1],
-                [1, 1]
-            ]
-        }/*, {
-            name: 'K',
-            color: ['#ED709D'],
-            shape: [
-                [1, 0, 0, 0],
-                [1, 0, 1, 0],
-                [1, 1, 0, 0],
-                [1, 0, 1, 0]
-            ]
-        }, { // This version of the o piece allows for o-spins
-            name: 'O',
-            color: ['#F1F000'],
-            shape: [
-                [0, 1, 1],
-                [0, 1, 1],
-                [0, 0, 0]
-            ]
-        }, {
-            name: 'wtf',
-            color: ['#F0007F'],
-            shape: [
-                [0, 1, 1, 1, 0],
-                [1, 1, 0, 1, 0],
-                [0, 1, 1, 0, 0],
-                [1, 1, 0, 0, 0],
-                [1, 0, 0, 0, 0]
-            ]
-        }, {
-            name: 'Heaven Piece',
-            color: ['#FFFFFF'],
-            shape: [
-                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-            ]
-        }, {
-            name: 'Diep',
-            color: ['#14ACD4', '#959595'],
-            shape: [
-                [0, 0, 0, 0],
-                [1, 1, 1, 0],
-                [1, 1, 1, 2],
-                [1, 1, 1, 0]
-            ]
-        }, {
-            name: 'Broque Monsieur',
-            color: ['#0DFF72'],
-            shape: [
-                [1, 1, 1, 1],
-                [1, 1, 1, 1],
-                [1, 1, 1, 1],
-                [1, 1, 1, 1]
-            ]
-        }, {
-            name: 'Mino',
-            color: ['#FF0D72'],
-            shape: [
-                [1]
-            ]
-        }, {
-            name: 'Linus',
-            color: ['#F538FF'],
-            shape: [
-                [1, 1, 1, 1, 1, 1, 1, 1, 1],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            ]
-        }, {
-            name: 'Ghostmaster',
-            color: ['#F538FF', '#0DFF72'],
-            shape: [
-                [0, 1, 1, 1, 0, 0],
-                [1, 1, 1, 1, 1, 0],
-                [1, 2, 1, 2, 1, 0],
-                [1, 1, 1, 1, 1, 0],
-                [1, 1, 1, 1, 1, 0],
-                [1, 1, 0, 1, 1, 0],
-            ]
-        }, {
-            name: `Drifter's Piece`,
-            color: ['#72A8FE'],
-            shape: [
-                [0, 1, 0, 0],
-                [0, 0, 1, 0],
-                [0, 0, 1, 0],
-                [1, 0, 0, 0]
-            ]
-        }, {
-            name: 'logo',
-            color: ['#FF8833', '#FF88EE', '#FEFCBB', '#01F001'],
-            shape: [
-                [0, 3, 0],
-                [1, 2, 4],
-                [0, 0, 0]
-            ]
-        }*/],
-        dims: {
-            width: 10,
-            height: 20
-        },
-        control: {
-            left: {
-                execute: () => {
-                    movePiece(-1, 0);
-                },
-                key: 'a',
-                pressed: 0
-            },
-            right: {
-                execute: () => {
-                    movePiece(1, 0);
-                },
-                key: 'd',
-                pressed: 0
-            },
-            hdrop: {
-                execute: () => {
-                    while (game.piece) movePiece(0, 1);
-                },
-                key: 'w',
-                pressed: 0,
-                buffer: 0
-            },
-            down: {
-                execute: () => {
-                    movePiece(0, 1);
-                },
-                key: 's',
-                pressed: 0
-            },
-            ccw: {
-                execute: () => {
-                    rotatePiece(-1);
-                },
-                key: 'j',
-                pressed: 0,
-                buffer: 0
-            },
-            cw: {
-                execute: () => {
-                    rotatePiece(1);
-                },
-                key: 'k',
-                pressed: 0,
-                buffer: 0
-            },
-            pause: {
-                execute: () => {
-                    pause();
-                },
-                key: 'Enter',
-                pressed: 0,
-                buffer: 0
-            }
-        },
-        linesCleared: [],
-        piece: undefined,
-        bag: undefined,
-        hold: undefined,
-        done: undefined,
-        paused: false,
-        placeBuffer: 0,
-        timer: 0,
-        speed: 2,
-    };
+function gameInit(options) {
+    game = options;
     board = ((out = []) => { // Merge this with the game object
         for (let i = 0; i < game.dims.height; i++) {
             out.push(new Array(game.dims.width).fill(0));
@@ -563,4 +329,238 @@ function gameInit() {
     }, 1000 / 60);
 }
 
-gameInit();
+gameInit({
+    minoes: [{
+        name: 'I',
+        color: ['#00F0F1'],
+        shape: [
+            [0, 0, 0, 0],
+            [1, 1, 1, 1],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ]
+    }, {
+        name: 'J',
+        color: ['#0000f0'],
+        shape: [
+            [1, 0, 0],
+            [1, 1, 1],
+            [0, 0, 0]
+        ]
+    }, {
+        name: 'L',
+        color: ['#EF9F00'],
+        shape: [
+            [0, 0, 1],
+            [1, 1, 1],
+            [0, 0, 0]
+        ]
+    }, {
+        name: 'S',
+        color: ['#01F001'],
+        shape: [
+            [0, 1, 1],
+            [1, 1, 0],
+            [0, 0, 0]
+        ]
+    }, {
+        name: 'Z',
+        color: ['#F00001'],
+        shape: [
+            [1, 1, 0],
+            [0, 1, 1],
+            [0, 0, 0]
+        ]
+    }, {
+        name: 'T',
+        color: ['#A000F0'],
+        shape: [
+            [0, 1, 0],
+            [1, 1, 1],
+            [0, 0, 0]
+        ]
+    }, {
+        name: 'O',
+        color: ['#F1F000'],
+        shape: [
+            [1, 1],
+            [1, 1]
+        ]
+    }/*, {
+        name: 'K',
+        color: ['#ED709D'],
+        shape: [
+            [1, 0, 0, 0],
+            [1, 0, 1, 0],
+            [1, 1, 0, 0],
+            [1, 0, 1, 0]
+        ]
+    }, { // This version of the o piece allows for o-spins
+        name: 'O',
+        color: ['#F1F000'],
+        shape: [
+            [0, 1, 1],
+            [0, 1, 1],
+            [0, 0, 0]
+        ]
+    }, {
+        name: 'wtf',
+        color: ['#F0007F'],
+        shape: [
+            [0, 1, 1, 1, 0],
+            [1, 1, 0, 1, 0],
+            [0, 1, 1, 0, 0],
+            [1, 1, 0, 0, 0],
+            [1, 0, 0, 0, 0]
+        ]
+    }, {
+        name: 'Heaven Piece',
+        color: ['#FFFFFF'],
+        shape: [
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        ]
+    }, {
+        name: 'Diep',
+        color: ['#14ACD4', '#959595'],
+        shape: [
+            [0, 0, 0, 0],
+            [1, 1, 1, 0],
+            [1, 1, 1, 2],
+            [1, 1, 1, 0]
+        ]
+    }, {
+        name: 'Broque Monsieur',
+        color: ['#0DFF72'],
+        shape: [
+            [1, 1, 1, 1],
+            [1, 1, 1, 1],
+            [1, 1, 1, 1],
+            [1, 1, 1, 1]
+        ]
+    }, {
+        name: 'Mino',
+        color: ['#FF0D72'],
+        shape: [
+            [1]
+        ]
+    }, {
+        name: 'Linus',
+        color: ['#F538FF'],
+        shape: [
+            [1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0]
+        ]
+    }, {
+        name: 'Ghostmaster',
+        color: ['#F538FF', '#0DFF72'],
+        shape: [
+            [0, 1, 1, 1, 0, 0],
+            [1, 1, 1, 1, 1, 0],
+            [1, 2, 1, 2, 1, 0],
+            [1, 1, 1, 1, 1, 0],
+            [1, 1, 1, 1, 1, 0],
+            [1, 1, 0, 1, 1, 0]
+        ]
+    }, {
+        name: `Drifter's Piece`,
+        color: ['#72A8FE'],
+        shape: [
+            [0, 1, 0, 0],
+            [0, 0, 1, 0],
+            [0, 0, 1, 0],
+            [1, 0, 0, 0]
+        ]
+    }, {
+        name: 'logo',
+        color: ['#FF8833', '#FF88EE', '#FEFCBB', '#01F001'],
+        shape: [
+            [0, 3, 0],
+            [1, 2, 4],
+            [0, 0, 0]
+        ]
+    }*/],
+    dims: {
+        width: 10,
+        height: 20
+    },
+    control: {
+        left: {
+            execute: () => {
+                movePiece(-1, 0);
+            },
+            key: 'a',
+            pressed: 0
+        },
+        right: {
+            execute: () => {
+                movePiece(1, 0);
+            },
+            key: 'd',
+            pressed: 0
+        },
+        hdrop: {
+            execute: () => {
+                while (game.piece) movePiece(0, 1);
+            },
+            key: 'w',
+            pressed: 0,
+            buffer: 0
+        },
+        down: {
+            execute: () => {
+                movePiece(0, 1);
+            },
+            key: 's',
+            pressed: 0
+        },
+        ccw: {
+            execute: () => {
+                rotatePiece(-1);
+            },
+            key: 'j',
+            pressed: 0,
+            buffer: 0
+        },
+        cw: {
+            execute: () => {
+                rotatePiece(1);
+            },
+            key: 'k',
+            pressed: 0,
+            buffer: 0
+        },
+        pause: {
+            execute: () => {
+                pause();
+            },
+            key: 'Enter',
+            pressed: 0,
+            buffer: 0
+        }
+    },
+    linesCleared: [],
+    piece: undefined,
+    bag: undefined,
+    hold: undefined,
+    done: undefined,
+    paused: false,
+    placeBuffer: 0,
+    timer: 0,
+    speed: 2,
+});
