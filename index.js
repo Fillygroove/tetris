@@ -1,295 +1,27 @@
-let game = {
-    minoes: [{
-        name: 'I',
-        color: ['#00F0F1'],
-        shape: [
-            [0, 0, 0, 0],
-            [1, 1, 1, 1],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0]
-        ]
-    }, {
-        name: 'J',
-        color: ['#0000f0'],
-        shape: [
-            [1, 0, 0],
-            [1, 1, 1],
-            [0, 0, 0],
-        ]
-    }, {
-        name: 'L',
-        color: ['#EF9F00'],
-        shape: [
-            [0, 0, 1],
-            [1, 1, 1],
-            [0, 0, 0],
-        ]
-    }, {
-        name: 'S',
-        color: ['#01F001'],
-        shape: [
-            [0, 1, 1],
-            [1, 1, 0],
-            [0, 0, 0]
-        ]
-    }, {
-        name: 'Z',
-        color: ['#F00001'],
-        shape: [
-            [1, 1, 0],
-            [0, 1, 1],
-            [0, 0, 0]
-        ]
-    }, {
-        name: 'T',
-        color: ['#A000F0'],
-        shape: [
-            [0, 1, 0],
-            [1, 1, 1],
-            [0, 0, 0]
-        ]
-    }, {
-        name: 'O',
-        color: ['#F1F000'],
-        shape: [
-            [1, 1],
-            [1, 1]
-        ]
-    }/*, {
-        name: 'K',
-        color: ['#ED709D'],
-        shape: [
-            [1, 0, 0, 0],
-            [1, 0, 1, 0],
-            [1, 1, 0, 0],
-            [1, 0, 1, 0]
-        ]
-    }, { // This version of the o piece allows for o-spins
-        name: 'O',
-        color: ['#F1F000'],
-        shape: [
-            [0, 1, 1],
-            [0, 1, 1],
-            [0, 0, 0]
-        ]
-    }, {
-        name: 'wtf',
-        color: ['#F0007F'],
-        shape: [
-            [0, 1, 1, 1, 0],
-            [1, 1, 0, 1, 0],
-            [0, 1, 1, 0, 0],
-            [1, 1, 0, 0, 0],
-            [1, 0, 0, 0, 0]
-        ]
-    }, {
-        name: 'Heaven Piece',
-        color: ['#FFFFFF'],
-        shape: [
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        ]
-    }, {
-        name: 'Diep',
-        color: ['#14ACD4', '#959595'],
-        shape: [
-            [0, 0, 0, 0],
-            [1, 1, 1, 0],
-            [1, 1, 1, 2],
-            [1, 1, 1, 0]
-        ]
-    }, {
-        name: 'Broque Monsieur',
-        color: ['#0DFF72'],
-        shape: [
-            [1, 1, 1, 1],
-            [1, 1, 1, 1],
-            [1, 1, 1, 1],
-            [1, 1, 1, 1]
-        ]
-    }, {
-        name: 'Mino',
-        color: ['#FF0D72'],
-        shape: [
-            [1]
-        ]
-    }, {
-        name: 'Linus',
-        color: ['#F538FF'],
-        shape: [
-            [1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        ]
-    }, {
-        name: 'Ghostmaster',
-        color: ['#F538FF', '#0DFF72'],
-        shape: [
-			[0, 1, 1, 1, 0, 0],
-			[1, 1, 1, 1, 1, 0],
-			[1, 2, 1, 2, 1, 0],
-			[1, 1, 1, 1, 1, 0],
-			[1, 1, 1, 1, 1, 0],
-			[1, 1, 0, 1, 1, 0],
-        ]
-    }, {
-        name: `Drifter's Piece`,
-        color: ['#72A8FE'],
-        shape: [
-            [0, 1, 0, 0],
-            [0, 0, 1, 0],
-            [0, 0, 1, 0],
-            [1, 0, 0, 0]
-        ]
-    }, {
-        name: 'logo',
-        color: ['#FF8833', '#FF88EE', '#FEFCBB', '#01F001'],
-        shape: [
-            [0, 3, 0],
-            [1, 2, 4],
-            [0, 0, 0]
-        ]
-    }*/],
-    dims: {
-        width: 10,
-        height: 20
-    },
-    control: {
-        left: {
-            execute: () => {
-                movePiece(-1, 0);
-            },
-            key: 'a',
-            pressed: 0
-        },
-        right: {
-            execute: () => {
-                movePiece(1, 0);
-            },
-            key: 'd',
-            pressed: 0
-        },
-        hdrop: {
-            execute: () => {
-                while (game.piece) movePiece(0, 1);
-            },
-            key: 'w',
-            pressed: 0,
-            buffer: 0
-        },
-        down: {
-            execute: () => {
-                movePiece(0, 1);
-            },
-            key: 's',
-            pressed: 0
-        },
-        ccw: {
-            execute: () => {
-                rotatePiece(-1);
-            },
-            key: 'j',
-            pressed: 0,
-            buffer: 0
-        },
-        cw: {
-            execute: () => {
-                rotatePiece(1);
-            },
-            key: 'k',
-            pressed: 0,
-            buffer: 0
-        },
-        pause: {
-            execute: () => {
-                pause();
-            },
-            key: 'Enter',
-            pressed: 0,
-            buffer: 0
-        }
-    },
-    linesCleared: [],
-    piece: undefined,
-    bag: undefined,
-    hold: undefined,
-    done: undefined,
-    paused: false,
-    placeBuffer: 0,
-    timer: 0,
-    speed: 2,
-};
-
-let boardSize = 500;
 let divBoard = document.getElementById('board');
 let pauseDiv = document.getElementById('pause');
+let gameLoop;
+let game;
+let board;
 
-if (game.dims.width > game.dims.height) {
-    divBoard.style.width = pauseDiv.style.width = `100%`;
-    divBoard.style.height = pauseDiv.style.height = `${50 * game.dims.height / game.dims.width}%`;
-} else {
-    divBoard.style.width = pauseDiv.style.width = `${200 * game.dims.width / game.dims.height}%`;
-    divBoard.style.height = pauseDiv.style.height = `100%`;
-}
-
-for (let i = 0; i < game.dims.height; i++) {
-    let row = document.createElement('div');
-    row.className = 'game-row';
-    row.id = `row${i}`;
-    row.style.height = `${100 / game.dims.height}%`;
-
-    for (let j = 0; j < game.dims.width; j++) {
-        let col = document.createElement('div');
-        col.className = 'game-col';
-        col.id = `col${j}`;
-        col.style.width = `${100 / game.dims.width}%`;
-
-        row.append(col);
+document.addEventListener("keydown", (e) => {
+    for (let key in game.control) {
+        if (game.control[key].key == e.key) {
+            if (!game.control[key].buffer) {
+                game.control[key].pressed = 1;
+            }
+        }
     }
+});
 
-    divBoard.append(row);
-}
-
-let blankRow = divBoard.children[0].innerHTML; 
-let board = ((out = []) => { // Merge this with the game object
-    for (let i = 0; i < game.dims.height; i++) {
-        out.push(new Array(game.dims.width).fill(0));
+document.addEventListener("keyup", (e) => {
+    for (let key in game.control) {
+        if (game.control[key].key == e.key) {
+            game.control[key].pressed = 0;
+            game.control[key].buffer = game.control[key].buffer == undefined ? undefined : 0;
+        }
     }
-    
-    return out;
-})();
-
-function print(arr) {
-    let out = ''
-    for (let i = 0; i < arr.length; i++) out += arr[i].toString().replaceAll(',', '\t') + '\n';
-    console.log(out);
-}
-
-function pause() {
-    if (!game.paused) {
-        divBoard.style.visibility = 'hidden';
-        pauseDiv.style.visibility = 'visible';
-        game.paused = true;
-    } else {
-        divBoard.style.visibility = 'visible';
-        pauseDiv.style.visibility = 'hidden';
-        game.paused = false;    
-    }
-}
+});
 
 function shadeColor(color, percent) {
     var R = parseInt(color.substring(1,3),16);
@@ -335,15 +67,15 @@ function drawPixel(col, row, color) {
     }
 }
 
-function erasePiece() {
-    for (let indices of game.piece.indices) {
-        drawPixel(indices.col, indices.row, '#333333');
-    }
-}
-
 function drawPiece() {
     for (let indices of game.piece.indices) {
         drawPixel(indices.col, indices.row, indices.color);
+    }
+}
+
+function erasePiece() {
+    for (let indices of game.piece.indices) {
+        drawPixel(indices.col, indices.row, '#333333');
     }
 }
 
@@ -374,8 +106,6 @@ function setPiece(minoIndex) {
             leftmost + (mino.shape.length - 1) / 2
         ]
     };
-
-    console.log(game.piece);
 
     drawPiece();
 }
@@ -474,89 +204,363 @@ function movePiece(x, y) {
     drawPiece();
 }
 
-document.addEventListener("keydown", (e) => {
-    for (let key in game.control) {
-        if (game.control[key].key == e.key) {
-            if (!game.control[key].buffer) {
-                game.control[key].pressed = 1;
-            }
-        }
-    }
-});
-
-document.addEventListener("keyup", (e) => {
-    for (let key in game.control) {
-        if (game.control[key].key == e.key) {
-            game.control[key].pressed = 0;
-            game.control[key].buffer = game.control[key].buffer == undefined ? undefined : 0;
-        }
-    }
-});
-
-let gameLoop = setInterval(() => {
-    if (game.paused) {
-        // to do: rewrite as an event listener instead of something that's executed every frame
-        if (game.control.pause.pressed) {
-            game.control.pause.pressed = 0;
-            
-            if (game.control.pause.buffer != undefined) {
-                game.control.pause.buffer = 1;
-            }
-
-            pause();
-        }
+function pause() {
+    if (!game.paused) {
+        divBoard.style.visibility = 'hidden';
+        pauseDiv.style.visibility = 'visible';
+        game.paused = true;
     } else {
-        if (game.linesCleared.length == 0) {
-            // If the game is completed, stop the loop
-            if (game.done) clearInterval(gameLoop);
+        divBoard.style.visibility = 'visible';
+        pauseDiv.style.visibility = 'hidden';
+        game.paused = false;    
+    }
+}
 
-            if (!game.piece) setPiece(Math.floor(Math.random() * game.minoes.length));
-            else {
-                // Increment the timer
-                game.timer = (game.timer + 1) % 60;
-
-                // Move the piece down from time to time
-                if (game.timer % Math.round(60 / game.speed) == 0) {
+function gameInit() {
+    game = {
+        minoes: [{
+            name: 'I',
+            color: ['#00F0F1'],
+            shape: [
+                [0, 0, 0, 0],
+                [1, 1, 1, 1],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0]
+            ]
+        }, {
+            name: 'J',
+            color: ['#0000f0'],
+            shape: [
+                [1, 0, 0],
+                [1, 1, 1],
+                [0, 0, 0],
+            ]
+        }, {
+            name: 'L',
+            color: ['#EF9F00'],
+            shape: [
+                [0, 0, 1],
+                [1, 1, 1],
+                [0, 0, 0],
+            ]
+        }, {
+            name: 'S',
+            color: ['#01F001'],
+            shape: [
+                [0, 1, 1],
+                [1, 1, 0],
+                [0, 0, 0]
+            ]
+        }, {
+            name: 'Z',
+            color: ['#F00001'],
+            shape: [
+                [1, 1, 0],
+                [0, 1, 1],
+                [0, 0, 0]
+            ]
+        }, {
+            name: 'T',
+            color: ['#A000F0'],
+            shape: [
+                [0, 1, 0],
+                [1, 1, 1],
+                [0, 0, 0]
+            ]
+        }, {
+            name: 'O',
+            color: ['#F1F000'],
+            shape: [
+                [1, 1],
+                [1, 1]
+            ]
+        }/*, {
+            name: 'K',
+            color: ['#ED709D'],
+            shape: [
+                [1, 0, 0, 0],
+                [1, 0, 1, 0],
+                [1, 1, 0, 0],
+                [1, 0, 1, 0]
+            ]
+        }, { // This version of the o piece allows for o-spins
+            name: 'O',
+            color: ['#F1F000'],
+            shape: [
+                [0, 1, 1],
+                [0, 1, 1],
+                [0, 0, 0]
+            ]
+        }, {
+            name: 'wtf',
+            color: ['#F0007F'],
+            shape: [
+                [0, 1, 1, 1, 0],
+                [1, 1, 0, 1, 0],
+                [0, 1, 1, 0, 0],
+                [1, 1, 0, 0, 0],
+                [1, 0, 0, 0, 0]
+            ]
+        }, {
+            name: 'Heaven Piece',
+            color: ['#FFFFFF'],
+            shape: [
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            ]
+        }, {
+            name: 'Diep',
+            color: ['#14ACD4', '#959595'],
+            shape: [
+                [0, 0, 0, 0],
+                [1, 1, 1, 0],
+                [1, 1, 1, 2],
+                [1, 1, 1, 0]
+            ]
+        }, {
+            name: 'Broque Monsieur',
+            color: ['#0DFF72'],
+            shape: [
+                [1, 1, 1, 1],
+                [1, 1, 1, 1],
+                [1, 1, 1, 1],
+                [1, 1, 1, 1]
+            ]
+        }, {
+            name: 'Mino',
+            color: ['#FF0D72'],
+            shape: [
+                [1]
+            ]
+        }, {
+            name: 'Linus',
+            color: ['#F538FF'],
+            shape: [
+                [1, 1, 1, 1, 1, 1, 1, 1, 1],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            ]
+        }, {
+            name: 'Ghostmaster',
+            color: ['#F538FF', '#0DFF72'],
+            shape: [
+                [0, 1, 1, 1, 0, 0],
+                [1, 1, 1, 1, 1, 0],
+                [1, 2, 1, 2, 1, 0],
+                [1, 1, 1, 1, 1, 0],
+                [1, 1, 1, 1, 1, 0],
+                [1, 1, 0, 1, 1, 0],
+            ]
+        }, {
+            name: `Drifter's Piece`,
+            color: ['#72A8FE'],
+            shape: [
+                [0, 1, 0, 0],
+                [0, 0, 1, 0],
+                [0, 0, 1, 0],
+                [1, 0, 0, 0]
+            ]
+        }, {
+            name: 'logo',
+            color: ['#FF8833', '#FF88EE', '#FEFCBB', '#01F001'],
+            shape: [
+                [0, 3, 0],
+                [1, 2, 4],
+                [0, 0, 0]
+            ]
+        }*/],
+        dims: {
+            width: 10,
+            height: 20
+        },
+        control: {
+            left: {
+                execute: () => {
+                    movePiece(-1, 0);
+                },
+                key: 'a',
+                pressed: 0
+            },
+            right: {
+                execute: () => {
+                    movePiece(1, 0);
+                },
+                key: 'd',
+                pressed: 0
+            },
+            hdrop: {
+                execute: () => {
+                    while (game.piece) movePiece(0, 1);
+                },
+                key: 'w',
+                pressed: 0,
+                buffer: 0
+            },
+            down: {
+                execute: () => {
                     movePiece(0, 1);
-                }
+                },
+                key: 's',
+                pressed: 0
+            },
+            ccw: {
+                execute: () => {
+                    rotatePiece(-1);
+                },
+                key: 'j',
+                pressed: 0,
+                buffer: 0
+            },
+            cw: {
+                execute: () => {
+                    rotatePiece(1);
+                },
+                key: 'k',
+                pressed: 0,
+                buffer: 0
+            },
+            pause: {
+                execute: () => {
+                    pause();
+                },
+                key: 'Enter',
+                pressed: 0,
+                buffer: 0
             }
+        },
+        linesCleared: [],
+        piece: undefined,
+        bag: undefined,
+        hold: undefined,
+        done: undefined,
+        paused: false,
+        placeBuffer: 0,
+        timer: 0,
+        speed: 2,
+    };
+    board = ((out = []) => { // Merge this with the game object
+        for (let i = 0; i < game.dims.height; i++) {
+            out.push(new Array(game.dims.width).fill(0));
+        }
+        
+        return out;
+    })();
+    
+    if (game.dims.width > game.dims.height) {
+        divBoard.style.width = pauseDiv.style.width = `100%`;
+        divBoard.style.height = pauseDiv.style.height = `${50 * game.dims.height / game.dims.width}%`;
+    } else {
+        divBoard.style.width = pauseDiv.style.width = `${200 * game.dims.width / game.dims.height}%`;
+        divBoard.style.height = pauseDiv.style.height = `100%`;
+    }
+    
+    divBoard.innerHTML = '';
+    divBoard.style.visibility = 'visible';
+    pauseDiv.style.visibility = 'hidden';
 
-            // Control manager
-            for (let control in game.control) {
-                if (game.control[control].pressed) {
-                    game.control[control].pressed = 0;
-                    
-                    if (game.control[control].buffer != undefined) {
-                        game.control[control].buffer = 1;
-                    }
+    for (let i = 0; i < game.dims.height; i++) {
+        let row = document.createElement('div');
+        row.className = 'game-row';
+        row.id = `row${i}`;
+        row.style.height = `${100 / game.dims.height}%`;
+    
+        for (let j = 0; j < game.dims.width; j++) {
+            let col = document.createElement('div');
+            col.className = 'game-col';
+            col.id = `col${j}`;
+            col.style.width = `${100 / game.dims.width}%`;
+    
+            row.append(col);
+        }
+    
+        divBoard.append(row);
+    }
+    
+    let blankRow = divBoard.children[0].innerHTML; 
+    
+    if (gameLoop) clearInterval(gameLoop);
 
-                    game.control[control].execute();
-                    break;
+    gameLoop = setInterval(() => {
+        if (game.paused) {
+            // to do: rewrite as an event listener instead of something that's executed every frame
+            if (game.control.pause.pressed) {
+                game.control.pause.pressed = 0;
+                
+                if (game.control.pause.buffer != undefined) {
+                    game.control.pause.buffer = 1;
                 }
+
+                pause();
             }
         } else {
-            // Sort line indices from smallest to largest; Ensures that no bugs happen when the above lines are dropped down
-            game.linesCleared.sort((a, b) => (a - b));
+            if (game.linesCleared.length == 0) {
+                // If the game is completed, stop the loop
+                if (game.done) clearInterval(gameLoop);
 
-            for (let i = 0; i < game.linesCleared.length; i++) {
-                // Clear line; No need to redraw since it's going to get overwritten anyway
-                board[game.linesCleared[i]].fill(0);
+                if (!game.piece) setPiece(Math.floor(Math.random() * game.minoes.length));
+                else {
+                    // Increment the timer
+                    game.timer = (game.timer + 1) % 60;
 
-                // Move everything from above that line down
-                for (let j = game.linesCleared[i] - 1; j > -1; j--) {
-                    divBoard.children[j + 1].innerHTML = divBoard.children[j].innerHTML;
-                    divBoard.children[j].innerHTML = blankRow;
-
-                    // Shallow copies suck.
-                    for (let k = 0; k < board[j].length; k++) {
-                        board[j + 1][k] = board[j][k];
+                    // Move the piece down from time to time
+                    if (game.timer % Math.round(60 / game.speed) == 0) {
+                        movePiece(0, 1);
                     }
-
-                    board[j].fill(0);
                 }
-            }
 
-            game.linesCleared = [];
+                // Control manager
+                for (let control in game.control) {
+                    if (game.control[control].pressed) {
+                        game.control[control].pressed = 0;
+                        
+                        if (game.control[control].buffer != undefined) {
+                            game.control[control].buffer = 1;
+                        }
+
+                        game.control[control].execute();
+                        break;
+                    }
+                }
+            } else {
+                // Sort line indices from smallest to largest; Ensures that no bugs happen when the above lines are dropped down
+                game.linesCleared.sort((a, b) => (a - b));
+
+                for (let i = 0; i < game.linesCleared.length; i++) {
+                    // Clear line; No need to redraw since it's going to get overwritten anyway
+                    board[game.linesCleared[i]].fill(0);
+
+                    // Move everything from above that line down
+                    for (let j = game.linesCleared[i] - 1; j > -1; j--) {
+                        divBoard.children[j + 1].innerHTML = divBoard.children[j].innerHTML;
+                        divBoard.children[j].innerHTML = blankRow;
+
+                        // Shallow copies suck.
+                        for (let k = 0; k < board[j].length; k++) {
+                            board[j + 1][k] = board[j][k];
+                        }
+
+                        board[j].fill(0);
+                    }
+                }
+
+                game.linesCleared = [];
+            }
         }
-    }
-}, 1000 / 60);
+    }, 1000 / 60);
+}
+
+gameInit();
