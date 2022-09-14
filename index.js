@@ -267,7 +267,7 @@ for (let i = 0; i < game.dims.height; i++) {
 let blankRow = divBoard.children[0].innerHTML; 
 let board = ((out = []) => { // Merge this with the game object
     for (let i = 0; i < game.dims.height; i++) {
-        out.push(new Array(game.dims.width).fill(undefined));
+        out.push(new Array(game.dims.width).fill(0));
     }
     
     return out;
@@ -353,7 +353,6 @@ function setPiece(minoIndex) {
 
     game.timer = 0;
     game.piece = {
-        color: mino.color,
         indices: ((out = []) => {
             for (let i = 0; i < mino.shape.length; i++) {
                 for (let j = 0; j < mino.shape.length; j++) {
@@ -440,8 +439,8 @@ function movePiece(x, y) {
             if (y != 0) {
                 if (game.placeBuffer) {
                     for (let i = 0; i < game.piece.indices.length; i++) {
-                        board[game.piece.indices[i].col][game.piece.indices[i].row] = game.piece.color;
-                        if (!board[game.piece.indices[i].col].includes(undefined)) {
+                        board[game.piece.indices[i].col][game.piece.indices[i].row] = 1;
+                        if (!board[game.piece.indices[i].col].includes(0)) {
                             if (!game.linesCleared.includes(game.piece.indices[i].col)) {
                                 game.linesCleared.push(game.piece.indices[i].col);
                             }
@@ -541,7 +540,7 @@ let gameLoop = setInterval(() => {
 
             for (let i = 0; i < game.linesCleared.length; i++) {
                 // Clear line; No need to redraw since it's going to get overwritten anyway
-                board[game.linesCleared[i]].fill(undefined);
+                board[game.linesCleared[i]].fill(0);
 
                 // Move everything from above that line down
                 for (let j = game.linesCleared[i] - 1; j > -1; j--) {
@@ -553,7 +552,7 @@ let gameLoop = setInterval(() => {
                         board[j + 1][k] = board[j][k];
                     }
 
-                    board[j].fill(undefined);
+                    board[j].fill(0);
                 }
             }
 
