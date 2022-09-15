@@ -1,5 +1,6 @@
 let divBoard = document.getElementById('board');
 let pauseDiv = document.getElementById('pause');
+let nextDiv = document.getElementById('main-hold');
 let gameLoop;
 let game;
 let board;
@@ -43,12 +44,7 @@ function shadeColor(color, percent) {
     return "#"+RR+GG+BB;
 }
 
-function drawPixel(col, row, color) {
-    // Find the pixel and give it proper attributes
-    let pixel = divBoard.children[col].children[row];
-    pixel.className = 'game-col';
-    pixel.style.width = `${100 / game.dims.width}%`;
-
+function drawPixel(pixel, color) {
     // Kill the child.
     pixel.innerHTML = '';
     pixel.style.backgroundColor = color;
@@ -69,18 +65,61 @@ function drawPixel(col, row, color) {
 
 function drawPiece() {
     for (let indices of game.piece.indices) {
-        drawPixel(indices.col, indices.row, indices.color);
+        let pixel = divBoard.children[indices.col].children[indices.row];
+        pixel.className = 'game-col';
+        pixel.style.width = `${100 / game.dims.width}%`;
+
+        drawPixel(pixel, indices.color);
     }
 }
 
 function erasePiece() {
     for (let indices of game.piece.indices) {
-        drawPixel(indices.col, indices.row, '#333333');
+        let pixel = divBoard.children[indices.col].children[indices.row];
+        pixel.className = 'game-col';
+        pixel.style.width = `${100 / game.dims.width}%`;
+        
+        drawPixel(pixel, '#333333');
     }
 }
 
-function setPiece(minoIndex) {
-    let mino = game.minoes[minoIndex];
+function drawNext(mino) {
+    nextDiv.innerHTML = '';
+
+    for (let i = 0; i < mino.shape.length; i++) {
+        let holdRow = document.createElement('div');
+        holdRow.className = 'hold-row';
+        holdRow.style.height = `${100 / mino.shape[i].length}%`;
+
+        for (let j = 0; j < mino.shape[i].length; j++) {
+            let holdCol = document.createElement('div');
+            holdCol.className = 'hold-col';
+            holdCol.style.width = `${100 / mino.shape[i].length}%`;
+
+            if (mino.shape[i][j]) {
+                drawPixel(holdCol, mino.color[mino.shape[i][j] - 1]);
+            }
+
+            holdRow.append(holdCol);
+        }
+
+        nextDiv.append(holdRow);
+    }
+};
+
+function setPiece() {
+    let mino;
+
+    if (!game.next) {
+        mino = game.minoes[Math.floor(Math.random() * game.minoes.length)];
+    } else {
+        mino = game.next;
+    }
+
+    game.next = game.minoes[Math.floor(Math.random() * game.minoes.length)];
+
+    drawNext(game.next);
+
     let leftmost = Math.floor((game.dims.width - mino.shape.length) / 2);
 
     game.timer = 0;
@@ -111,8 +150,6 @@ function setPiece(minoIndex) {
 }
 
 function rotatePiece(dir, check = 0) {
-    erasePiece();
-
     // If I just redefined the piece indices, the code breaks; I do not know why. 
     let newIndices = [];
 
@@ -143,21 +180,18 @@ function rotatePiece(dir, check = 0) {
         ) {
             // Do not rotate
             // Implement TTC SRS by adjusting the centerpoint, allowing for four extra checks
-            
-            drawPiece();
             return;
         }
 
         newIndices.push(indexArray);
     }
 
+    erasePiece();
     game.piece.indices = newIndices;
-
     drawPiece();
 }
 
 function movePiece(x, y) {
-    erasePiece();
     let newIndices = [];
 
     for (let i = 0; i < game.piece.indices.length; i++) {
@@ -165,7 +199,6 @@ function movePiece(x, y) {
         let newX = game.piece.indices[i].row + x;
 
         if (!board[newY] || board[newY][newX]) {
-            drawPiece();
             if (y != 0) {
                 if (game.placeBuffer) {
                     for (let i = 0; i < game.piece.indices.length; i++) {
@@ -184,7 +217,6 @@ function movePiece(x, y) {
             }
             return;
         } else if (newX < 0 || newX > game.dims.width - 1) {
-            drawPiece();
             return;
         }
 
@@ -194,6 +226,8 @@ function movePiece(x, y) {
             color: game.piece.indices[i].color
         });
     }
+
+    erasePiece();
 
     if (game.placeBuffer) game.placeBuffer = 0;
 
@@ -208,10 +242,12 @@ function pause() {
     if (!game.paused) {
         divBoard.style.visibility = 'hidden';
         pauseDiv.style.visibility = 'visible';
+        nextDiv.innerHTML = '';
         game.paused = true;
     } else {
         divBoard.style.visibility = 'visible';
         pauseDiv.style.visibility = 'hidden';
+        drawNext(game.next);
         game.paused = false;    
     }
 }
@@ -226,7 +262,7 @@ function gameInit(options) {
         return out;
     })();
     
-    if (game.dims.width > game.dims.height) {
+    if (game.dims.width / game.dims.height > 2) {
         divBoard.style.width = pauseDiv.style.width = `100%`;
         divBoard.style.height = pauseDiv.style.height = `${50 * game.dims.height / game.dims.width}%`;
     } else {
@@ -259,7 +295,7 @@ function gameInit(options) {
     let blankRow = divBoard.children[0].innerHTML; 
     
     if (gameLoop) clearInterval(gameLoop);
-
+    
     gameLoop = setInterval(() => {
         if (game.paused) {
             // to do: rewrite as an event listener instead of something that's executed every frame
@@ -277,7 +313,7 @@ function gameInit(options) {
                 // If the game is completed, stop the loop
                 if (game.done) clearInterval(gameLoop);
 
-                if (!game.piece) setPiece(Math.floor(Math.random() * game.minoes.length));
+                if (!game.piece) setPiece();
                 else {
                     // Increment the timer
                     game.timer = (game.timer + 1) % 60;
@@ -329,172 +365,182 @@ function gameInit(options) {
     }, 1000 / 60);
 }
 
+let standardMinos = [{
+    name: 'I',
+    color: ['#00F0F1'],
+    shape: [
+        [0, 0, 0, 0],
+        [1, 1, 1, 1],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0]
+    ]
+}, {
+    name: 'J',
+    color: ['#0000f0'],
+    shape: [
+        [1, 0, 0],
+        [1, 1, 1],
+        [0, 0, 0]
+    ]
+}, {
+    name: 'L',
+    color: ['#EF9F00'],
+    shape: [
+        [0, 0, 1],
+        [1, 1, 1],
+        [0, 0, 0]
+    ]
+}, {
+    name: 'S',
+    color: ['#01F001'],
+    shape: [
+        [0, 1, 1],
+        [1, 1, 0],
+        [0, 0, 0]
+    ]
+}, {
+    name: 'Z',
+    color: ['#F00001'],
+    shape: [
+        [1, 1, 0],
+        [0, 1, 1],
+        [0, 0, 0]
+    ]
+}, {
+    name: 'T',
+    color: ['#A000F0'],
+    shape: [
+        [0, 1, 0],
+        [1, 1, 1],
+        [0, 0, 0]
+    ]
+}, {
+    name: 'O',
+    color: ['#F1F000'],
+    shape: [
+        [1, 1],
+        [1, 1]
+    ]
+}];
+let aeroMinos = [{
+    name: 'Broque Monsieur',
+    color: ['#0DFF72'],
+    shape: [
+        [1, 1, 1, 1],
+        [1, 1, 1, 1],
+        [1, 1, 1, 1],
+        [1, 1, 1, 1]
+    ]
+}, {
+    name: 'Mino',
+    color: ['#FF0D72'],
+    shape: [
+        [1]
+    ]
+}, {
+    name: 'Linus',
+    color: ['#F538FF'],
+    shape: [
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+}/*, {
+    name: 'Ghostslayer',
+    color: ['#F538FF', '#0DFF72'],
+    shape: [
+        [0, 1, 1, 1, 0, 0],
+        [1, 1, 1, 1, 1, 0],
+        [1, 2, 1, 2, 1, 0],
+        [1, 1, 1, 1, 1, 0],
+        [1, 1, 1, 1, 1, 0],
+        [1, 1, 0, 1, 1, 0]
+    ]
+}*/];
+let miscMinos = [{
+    name: 'O',
+    color: ['#F1F000'],
+    shape: [
+        [0, 1, 1],
+        [0, 1, 1],
+        [0, 0, 0]
+    ]
+}, {
+    name: 'wtf',
+    color: ['#F0007F'],
+    shape: [
+        [0, 1, 1, 1, 0],
+        [1, 1, 0, 1, 0],
+        [0, 1, 1, 0, 0],
+        [1, 1, 0, 0, 0],
+        [1, 0, 0, 0, 0]
+    ]
+}, {
+    name: 'Heaven Piece',
+    color: ['#FFFFFF'],
+    shape: [
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+}, {
+    name: 'Diep',
+    color: ['#14ACD4', '#959595'],
+    shape: [
+        [0, 0, 0, 0, 0],
+        [0, 1, 1, 1, 0],
+        [0, 1, 1, 1, 2],
+        [0, 1, 1, 1, 0]
+        [0, 0, 0, 0, 0],
+    ]
+}, {
+    name: 'K',
+    color: ['#ED709D'],
+    shape: [
+        [1, 0, 0, 0],
+        [1, 0, 1, 0],
+        [1, 1, 0, 0],
+        [1, 0, 1, 0]
+    ]
+}, {
+    name: `Drifter's Piece`,
+    color: ['#72A8FE'],
+    shape: [
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 1, 0],
+        [1, 0, 0, 0]
+    ]
+}, {
+    name: 'logo',
+    color: ['#FF8833', '#FF88EE', '#FEFCBB', '#01F001'],
+    shape: [
+        [0, 3, 0],
+        [1, 2, 4],
+        [0, 0, 0]
+    ]
+}];
+
+
 gameInit({
-    minoes: [{
-        name: 'I',
-        color: ['#00F0F1'],
-        shape: [
-            [0, 0, 0, 0],
-            [1, 1, 1, 1],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0]
-        ]
-    }, {
-        name: 'J',
-        color: ['#0000f0'],
-        shape: [
-            [1, 0, 0],
-            [1, 1, 1],
-            [0, 0, 0]
-        ]
-    }, {
-        name: 'L',
-        color: ['#EF9F00'],
-        shape: [
-            [0, 0, 1],
-            [1, 1, 1],
-            [0, 0, 0]
-        ]
-    }, {
-        name: 'S',
-        color: ['#01F001'],
-        shape: [
-            [0, 1, 1],
-            [1, 1, 0],
-            [0, 0, 0]
-        ]
-    }, {
-        name: 'Z',
-        color: ['#F00001'],
-        shape: [
-            [1, 1, 0],
-            [0, 1, 1],
-            [0, 0, 0]
-        ]
-    }, {
-        name: 'T',
-        color: ['#A000F0'],
-        shape: [
-            [0, 1, 0],
-            [1, 1, 1],
-            [0, 0, 0]
-        ]
-    }, {
-        name: 'O',
-        color: ['#F1F000'],
-        shape: [
-            [1, 1],
-            [1, 1]
-        ]
-    }/*, {
-        name: 'K',
-        color: ['#ED709D'],
-        shape: [
-            [1, 0, 0, 0],
-            [1, 0, 1, 0],
-            [1, 1, 0, 0],
-            [1, 0, 1, 0]
-        ]
-    }, { // This version of the o piece allows for o-spins
-        name: 'O',
-        color: ['#F1F000'],
-        shape: [
-            [0, 1, 1],
-            [0, 1, 1],
-            [0, 0, 0]
-        ]
-    }, {
-        name: 'wtf',
-        color: ['#F0007F'],
-        shape: [
-            [0, 1, 1, 1, 0],
-            [1, 1, 0, 1, 0],
-            [0, 1, 1, 0, 0],
-            [1, 1, 0, 0, 0],
-            [1, 0, 0, 0, 0]
-        ]
-    }, {
-        name: 'Heaven Piece',
-        color: ['#FFFFFF'],
-        shape: [
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        ]
-    }, {
-        name: 'Diep',
-        color: ['#14ACD4', '#959595'],
-        shape: [
-            [0, 0, 0, 0],
-            [1, 1, 1, 0],
-            [1, 1, 1, 2],
-            [1, 1, 1, 0]
-        ]
-    }, {
-        name: 'Broque Monsieur',
-        color: ['#0DFF72'],
-        shape: [
-            [1, 1, 1, 1],
-            [1, 1, 1, 1],
-            [1, 1, 1, 1],
-            [1, 1, 1, 1]
-        ]
-    }, {
-        name: 'Mino',
-        color: ['#FF0D72'],
-        shape: [
-            [1]
-        ]
-    }, {
-        name: 'Linus',
-        color: ['#F538FF'],
-        shape: [
-            [1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0]
-        ]
-    }, {
-        name: 'Ghostmaster',
-        color: ['#F538FF', '#0DFF72'],
-        shape: [
-            [0, 1, 1, 1, 0, 0],
-            [1, 1, 1, 1, 1, 0],
-            [1, 2, 1, 2, 1, 0],
-            [1, 1, 1, 1, 1, 0],
-            [1, 1, 1, 1, 1, 0],
-            [1, 1, 0, 1, 1, 0]
-        ]
-    }, {
-        name: `Drifter's Piece`,
-        color: ['#72A8FE'],
-        shape: [
-            [0, 1, 0, 0],
-            [0, 0, 1, 0],
-            [0, 0, 1, 0],
-            [1, 0, 0, 0]
-        ]
-    }, {
-        name: 'logo',
-        color: ['#FF8833', '#FF88EE', '#FEFCBB', '#01F001'],
-        shape: [
-            [0, 3, 0],
-            [1, 2, 4],
-            [0, 0, 0]
-        ]
-    }*/],
+    minoes: [...standardMinos],
     dims: {
         width: 10,
         height: 20
@@ -556,8 +602,7 @@ gameInit({
     },
     linesCleared: [],
     piece: undefined,
-    bag: undefined,
-    hold: undefined,
+    next: undefined,
     done: undefined,
     paused: false,
     placeBuffer: 0,

@@ -264,3 +264,46 @@ ul, ol {
     height: 100%;
     display: block;
 }
+
+#left-wrapper {
+    position: absolute;
+    border-radius: 5px;
+    display: inline-block;
+    left: 50%;
+    translate: -230% -2px;
+    width: 100px;
+    height: 500px;
+    background-color: #333333;
+    border: #222 solid 2px;
+}
+
+#right-wrapper {
+    position: absolute;
+    border-radius: 5px;
+    display: inline-block;
+    left: 50%;
+    translate: 150% -2px;
+    width: 90px;
+    height: 500px;
+}
+
+#main-hold {
+    border-radius: 5px;
+    background-color: #333333;
+    border: #222 solid 2px;
+    width: 80px;
+    height: 80px;
+    margin: -2px;
+    padding: 5px;
+}
+
+#hold-text {
+    text-align: center;
+    user-select: none;
+    margin: 2px 0 !important;
+}
+
+.hold-col {
+    height: 100%;
+    display: inline-block;
+}
