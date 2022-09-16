@@ -1,7 +1,7 @@
 let divBoard = document.getElementById('board');
 let pauseDiv = document.getElementById('pause');
 let nextDiv = document.getElementById('next-main');
-let holdDiv = document.getElementById('hold-main');
+let holdDiv;
 let gameLoop;
 let game;
 let config;
@@ -250,18 +250,32 @@ function drawInDiv(div, minoID) {
     }
 }
 
+function drawNext() {
+    if (nextDiv) {
+        drawInDiv(nextDiv, game.next);
+    }
+}
+
+function drawHold() {
+    if (holdDiv && game.hold != undefined) {
+        drawInDiv(holdDiv, game.hold);
+    }
+}
+
 function pause() {
     if (!game.paused) {
         divBoard.style.visibility = 'hidden';
         pauseDiv.style.visibility = 'visible';
-        nextDiv.innerHTML = '';
-        holdDiv.innerHTML = '';
+
+        if (nextDiv) nextDiv.innerHTML = '';
+        if (holdDiv) holdDiv.innerHTML = '';
+
         game.paused = true;
     } else {
         divBoard.style.visibility = 'visible';
         pauseDiv.style.visibility = 'hidden';
-        drawInDiv(nextDiv, game.next);
-        if (game.hold != undefined) drawInDiv(holdDiv, game.hold);
+        drawNext();
+        drawHold();
         game.paused = false;    
     }
 }
@@ -321,6 +335,35 @@ function resetGame() {
     
     // Define the blank row used for line clears (this is lazy and needs a rewrite)
     blankRow = divBoard.children[0].innerHTML;
+
+    // If hold is enabled, add it
+    if (config.enableHold) {
+        let holdText = document.createElement('p');
+        holdText.id = 'div-text';
+        holdText.innerHTML = 'Hold';
+
+        holdDiv = document.createElement('div');
+        holdDiv.id = 'hold-main';
+
+        document.getElementById('left-wrapper').append(holdText, holdDiv);
+    } else document.getElementById('left-wrapper').innerHTML = '';
+
+    // If next count is above 0, add 
+    if (config.nextAmount) {
+        let nextText = document.createElement('p');
+        nextText.id = 'div-text';
+        nextText.innerHTML = 'Next';
+
+        nextDiv = document.createElement('div');
+        nextDiv.id = 'hold-main';
+
+        document.getElementById('right-wrapper').append(nextText, nextDiv);
+    } else document.getElementById('right-wrapper').innerHTML = '';
+    
+    /*
+        <p id="div-text">Hold</p>
+        <div id="hold-main"></div>
+    */
 }
 
 function gameInit(options = config) {
@@ -348,7 +391,7 @@ function gameInit(options = config) {
                 if (!game.piece.exists()) {
                     game.piece.set(game.next);
                     game.next = Math.floor(Math.random() * config.minos.length);
-                    drawInDiv(nextDiv, game.next);
+                    drawNext();
                 } else {
                     // Increment the timer
                     game.timer = (game.timer + 1) % 60;
@@ -695,13 +738,15 @@ gameInit({
         },
         hold: {
             execute: () => {
-                let holdTemp = game.hold;
-                game.hold = game.piece.index;
-                drawInDiv(holdDiv, game.hold);
-                game.piece.erase();
-                
-                if (holdTemp == undefined) game.piece.remove();
-                else game.piece.set(holdTemp);
+                if (config.enableHold) {
+                    let holdTemp = game.hold;
+                    game.hold = game.piece.index;
+                    drawHold();
+                    game.piece.erase();
+                    
+                    if (holdTemp == undefined) game.piece.remove();
+                    else game.piece.set(holdTemp);
+                }
             },
             key: 'q',
             pressed: 0,
