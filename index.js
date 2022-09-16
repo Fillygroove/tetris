@@ -7,20 +7,20 @@ let game;
 let board;
 
 document.addEventListener("keydown", (e) => {
-    for (let key in game.control) {
-        if (game.control[key].key == e.key) {
-            if (!game.control[key].buffer) {
-                game.control[key].pressed = 1;
+    for (let key in game.config.control) {
+        if (game.config.control[key].key == e.key) {
+            if (!game.config.control[key].buffer) {
+                game.config.control[key].pressed = 1;
             }
         }
     }
 });
 
 document.addEventListener("keyup", (e) => {
-    for (let key in game.control) {
-        if (game.control[key].key == e.key) {
-            game.control[key].pressed = 0;
-            game.control[key].buffer = game.control[key].buffer == undefined ? undefined : 0;
+    for (let key in game.config.control) {
+        if (game.config.control[key].key == e.key) {
+            game.config.control[key].pressed = 0;
+            game.config.control[key].buffer = game.config.control[key].buffer == undefined ? undefined : 0;
         }
     }
 });
@@ -36,7 +36,7 @@ class Piece {
         for (let indices of this.indices) {
             let pixel = divBoard.children[indices.col].children[indices.row];
             pixel.className = 'game-col';
-            pixel.style.width = `${100 / game.dims.width}%`;
+            pixel.style.width = `${100 / game.config.dims.width}%`;
     
             drawPixel(pixel, indices.color);
         }
@@ -46,7 +46,7 @@ class Piece {
         for (let indices of this.indices) {
             let pixel = divBoard.children[indices.col].children[indices.row];
             pixel.className = 'game-col';
-            pixel.style.width = `${100 / game.dims.width}%`;
+            pixel.style.width = `${100 / game.config.dims.width}%`;
     
             drawPixel(pixel, '#333333');
         }
@@ -65,8 +65,8 @@ class Piece {
     set(minoID) {
         if (this.exists()) this.erase();
 
-        let mino = game.minos[minoID];
-        let leftmost = Math.floor((game.dims.width - mino.shape.length) / 2);
+        let mino = game.config.minos[minoID];
+        let leftmost = Math.floor((game.config.dims.width - mino.shape.length) / 2);
     
         this.indices = ((out = []) => {
             for (let i = 0; i < mino.shape.length; i++) {
@@ -119,8 +119,8 @@ class Piece {
                 // The attempted rotation location exists...
                 board[indexArray.col][indexArray.row] ||
                 // or if that location is out of bounds...
-                indexArray.col < 0 || indexArray.col > game.dims.height -1 ||
-                indexArray.row < 0 || indexArray.row > game.dims.width -1 ||
+                indexArray.col < 0 || indexArray.col > game.config.dims.height -1 ||
+                indexArray.row < 0 || indexArray.row > game.config.dims.width -1 ||
                 // or if it didn't pass TTC SRS checks...
                 check > 4
             ) {
@@ -162,7 +162,7 @@ class Piece {
                     }
                 }
                 return;
-            } else if (newX < 0 || newX > game.dims.width - 1) {
+            } else if (newX < 0 || newX > game.config.dims.width - 1) {
                 return;
             }
     
@@ -225,7 +225,7 @@ function drawPixel(pixel, color) {
 }
 
 function drawInDiv(div, minoID) {
-    let mino = game.minos[minoID];
+    let mino = game.config.minos[minoID];
     div.innerHTML = '';
 
     for (let i = 0; i < mino.shape.length; i++) {
@@ -267,20 +267,20 @@ function pause() {
 
 function gameInit(options) {
     game = options;
-    game.next = Math.floor(Math.random() * game.minos.length);
+    game.next = Math.floor(Math.random() * game.config.minos.length);
 
     board = ((out = []) => { // Merge this with the game object
-        for (let i = 0; i < game.dims.height; i++) {
-            out.push(new Array(game.dims.width).fill(0));
+        for (let i = 0; i < game.config.dims.height; i++) {
+            out.push(new Array(game.config.dims.width).fill(0));
         }
         return out;
     })();
     
-    if (game.dims.width / game.dims.height > 2) {
+    if (game.config.dims.width / game.config.dims.height > 2) {
         divBoard.style.width = pauseDiv.style.width = `100%`;
-        divBoard.style.height = pauseDiv.style.height = `${50 * game.dims.height / game.dims.width}%`;
+        divBoard.style.height = pauseDiv.style.height = `${50 * game.config.dims.height / game.config.dims.width}%`;
     } else {
-        divBoard.style.width = pauseDiv.style.width = `${200 * game.dims.width / game.dims.height}%`;
+        divBoard.style.width = pauseDiv.style.width = `${200 * game.config.dims.width / game.config.dims.height}%`;
         divBoard.style.height = pauseDiv.style.height = `100%`;
     }
     
@@ -288,17 +288,17 @@ function gameInit(options) {
     divBoard.style.visibility = 'visible';
     pauseDiv.style.visibility = 'hidden';
 
-    for (let i = 0; i < game.dims.height; i++) {
+    for (let i = 0; i < game.config.dims.height; i++) {
         let row = document.createElement('div');
         row.className = 'game-row';
         row.id = `row${i}`;
-        row.style.height = `${100 / game.dims.height}%`;
+        row.style.height = `${100 / game.config.dims.height}%`;
     
-        for (let j = 0; j < game.dims.width; j++) {
+        for (let j = 0; j < game.config.dims.width; j++) {
             let col = document.createElement('div');
             col.className = 'game-col';
             col.id = `col${j}`;
-            col.style.width = `${100 / game.dims.width}%`;
+            col.style.width = `${100 / game.config.dims.width}%`;
     
             row.append(col);
         }
@@ -313,11 +313,11 @@ function gameInit(options) {
     gameLoop = setInterval(() => {
         if (game.paused) {
             // to do: rewrite as an event listener instead of something that's executed every frame
-            if (game.control.pause.pressed) {
-                game.control.pause.pressed = 0;
+            if (game.config.control.pause.pressed) {
+                game.config.control.pause.pressed = 0;
                 
-                if (game.control.pause.buffer != undefined) {
-                    game.control.pause.buffer = 1;
+                if (game.config.control.pause.buffer != undefined) {
+                    game.config.control.pause.buffer = 1;
                 }
 
                 pause();
@@ -329,7 +329,7 @@ function gameInit(options) {
 
                 if (!game.piece.exists()) {
                     game.piece.set(game.next);
-                    game.next = Math.floor(Math.random() * game.minos.length);
+                    game.next = Math.floor(Math.random() * game.config.minos.length);
                     drawInDiv(nextDiv, game.next);
                 } else {
                     // Increment the timer
@@ -342,15 +342,15 @@ function gameInit(options) {
                 }
 
                 // Control manager
-                for (let control in game.control) {
-                    if (game.control[control].pressed) {
-                        game.control[control].pressed = 0;
+                for (let control in game.config.control) {
+                    if (game.config.control[control].pressed) {
+                        game.config.control[control].pressed = 0;
                         
-                        if (game.control[control].buffer != undefined) {
-                            game.control[control].buffer = 1;
+                        if (game.config.control[control].buffer != undefined) {
+                            game.config.control[control].buffer = 1;
                         }
 
-                        game.control[control].execute();
+                        game.config.control[control].execute();
                         break;
                     }
                 }
@@ -621,79 +621,84 @@ let miscMinos = [{
 }];
 
 gameInit({
-    minos: [...standardMinos],
-    dims: {
-        width: 10,
-        height: 20
-    },
-    control: {
-        left: {
-            execute: () => {
-                game.piece.move(-1, 0);
+    config: {
+        control: {
+            left: {
+                execute: () => {
+                    game.piece.move(-1, 0);
+                },
+                key: 'a',
+                pressed: 0
             },
-            key: 'a',
-            pressed: 0
+            right: {
+                execute: () => {
+                    game.piece.move(1, 0);
+                },
+                key: 'd',
+                pressed: 0
+            },
+            hdrop: {
+                execute: () => {
+                    while (game.piece.exists()) game.piece.move(0, 1);
+                },
+                key: 'w',
+                pressed: 0,
+                buffer: 0
+            },
+            down: {
+                execute: () => {
+                    game.piece.move(0, 1);
+                },
+                key: 's',
+                pressed: 0
+            },
+            ccw: {
+                execute: () => {
+                    game.piece.rotate(-1);
+                },
+                key: 'j',
+                pressed: 0,
+                buffer: 0
+            },
+            cw: {
+                execute: () => {
+                    game.piece.rotate(1);
+                },
+                key: 'k',
+                pressed: 0,
+                buffer: 0
+            },
+            pause: {
+                execute: () => {
+                    pause();
+                },
+                key: 'Enter',
+                pressed: 0,
+                buffer: 0
+            },
+            hold: {
+                execute: () => {
+                    let holdTemp = game.hold;
+                    game.hold = game.piece.index;
+                    game.piece.erase();
+                    drawInDiv(holdDiv, game.hold);
+                    
+                    if (holdTemp == undefined) game.piece.remove();
+                    else game.piece.set(holdTemp);
+                },
+                key: 'q',
+                pressed: 0,
+                buffer: 0
+            }
         },
-        right: {
-            execute: () => {
-                game.piece.move(1, 0);
-            },
-            key: 'd',
-            pressed: 0
+        dims: {
+            width: 10,
+            height: 20
         },
-        hdrop: {
-            execute: () => {
-                while (game.piece.exists()) game.piece.move(0, 1);
-            },
-            key: 'w',
-            pressed: 0,
-            buffer: 0
-        },
-        down: {
-            execute: () => {
-                game.piece.move(0, 1);
-            },
-            key: 's',
-            pressed: 0
-        },
-        ccw: {
-            execute: () => {
-                game.piece.rotate(-1);
-            },
-            key: 'j',
-            pressed: 0,
-            buffer: 0
-        },
-        cw: {
-            execute: () => {
-                game.piece.rotate(1);
-            },
-            key: 'k',
-            pressed: 0,
-            buffer: 0
-        },
-        pause: {
-            execute: () => {
-                pause();
-            },
-            key: 'Enter',
-            pressed: 0,
-            buffer: 0
-        },
-        hold: {
-            execute: () => {
-                let holdTemp = game.hold;
-                game.hold = game.piece.index;
-                game.piece.erase();
-                drawInDiv(holdDiv, game.hold);
-                
-                if (holdTemp == undefined) game.piece.remove();
-                else game.piece.set(holdTemp);
-            },
-            key: 'q',
-            pressed: 0,
-            buffer: 0
-        }
+        minos: [...standardMinos],
+        garbage: 0,
+        enableHold: true,
+        nextAmount: 1
     },
     linesCleared: [],
     piece: new Piece(),
@@ -703,5 +708,5 @@ gameInit({
     paused: false,
     placeBuffer: 0,
     timer: 0,
-    speed: 2,
+    speed: 2
 });
