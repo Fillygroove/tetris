@@ -270,11 +270,9 @@ ul, ol {
     border-radius: 5px;
     display: inline-block;
     left: 50%;
-    translate: -230% -2px;
-    width: 100px;
+    translate: -250% -2px;
+    width: 90px;
     height: 500px;
-    background-color: #333333;
-    border: #222 solid 2px;
 }
 
 #right-wrapper {
@@ -287,7 +285,8 @@ ul, ol {
     height: 500px;
 }
 
-#main-hold {
+#next-main,
+#hold-main {
     border-radius: 5px;
     background-color: #333333;
     border: #222 solid 2px;
@@ -297,13 +296,14 @@ ul, ol {
     padding: 5px;
 }
 
-#hold-text {
+#div-text {
     text-align: center;
     user-select: none;
     margin: 2px 0 !important;
+    font-weight: bold;
 }
 
-.hold-col {
+.div-col {
     height: 100%;
     display: inline-block;
 }

@@ -1,6 +1,7 @@
 let divBoard = document.getElementById('board');
 let pauseDiv = document.getElementById('pause');
-let nextDiv = document.getElementById('main-hold');
+let nextDiv = document.getElementById('next-main');
+let holdDiv = document.getElementById('hold-main');
 let gameLoop;
 let game;
 let board;
@@ -23,6 +24,166 @@ document.addEventListener("keyup", (e) => {
         }
     }
 });
+
+class Piece {
+    constructor() {
+        this.indices;
+        this.center;
+        this.index;
+    }
+    
+    draw() {
+        for (let indices of this.indices) {
+            let pixel = divBoard.children[indices.col].children[indices.row];
+            pixel.className = 'game-col';
+            pixel.style.width = `${100 / game.dims.width}%`;
+    
+            drawPixel(pixel, indices.color);
+        }
+    }
+    
+    erase() {
+        for (let indices of this.indices) {
+            let pixel = divBoard.children[indices.col].children[indices.row];
+            pixel.className = 'game-col';
+            pixel.style.width = `${100 / game.dims.width}%`;
+    
+            drawPixel(pixel, '#333333');
+        }
+    }
+
+    remove() {
+        this.indices = undefined;
+        this.center = undefined;
+        this.index = undefined;
+    }
+
+    exists() {
+        return this.indices != undefined && this.center != undefined && this.index != undefined;  
+    }
+
+    set(minoID) {
+        if (this.exists()) this.erase();
+
+        let mino = game.minos[minoID];
+        let leftmost = Math.floor((game.dims.width - mino.shape.length) / 2);
+    
+        this.indices = ((out = []) => {
+            for (let i = 0; i < mino.shape.length; i++) {
+                for (let j = 0; j < mino.shape.length; j++) {
+                    if (mino.shape[i][j]) {
+                        out.push({
+                            col: i, 
+                            row: j + leftmost,
+                            color: mino.color[mino.shape[i][j] - 1]
+                        });
+                        if (board[i][j + leftmost]) game.done = 'lost';
+                    }
+                }
+            }
+
+            return out;
+        })();
+
+        this.center = [
+            (mino.shape.length - 1) / 2,
+            leftmost + (mino.shape.length - 1) / 2
+        ];
+
+        this.index = minoID;
+
+        this.draw();
+    }
+
+    rotate(dir, check = 0) { // this could be optimized very easily
+        // If I just redefined the piece indices, the code breaks; I do not know why. 
+        let newIndices = [];
+
+        for (let i = 0; i < this.indices.length; i++) {
+            // Move the x and y positions of the indices to (0, 0) instead of their current center
+            let y = this.indices[i].col - this.center[0];
+            let x = this.indices[i].row - this.center[1];
+            
+            // Calculate how far away they are from the center and what angle they're at from the center
+            let scale = Math.sqrt(y * y + x * x);
+            let angle = Math.atan2(x, y);
+
+            // Rotate the x and the y pieces clockwise or widdershins
+            let indexArray = {
+                col: Math.round(scale * Math.cos(angle - dir * Math.PI / 2) + this.center[0]), 
+                row: Math.round(scale * Math.sin(angle - dir * Math.PI / 2) + this.center[1]),
+                color: this.indices[i].color
+            };
+
+            if (
+                // The attempted rotation location exists...
+                board[indexArray.col][indexArray.row] ||
+                // or if that location is out of bounds...
+                indexArray.col < 0 || indexArray.col > game.dims.height -1 ||
+                indexArray.row < 0 || indexArray.row > game.dims.width -1 ||
+                // or if it didn't pass TTC SRS checks...
+                check > 4
+            ) {
+                // Do not rotate
+                // Implement TTC SRS by adjusting the centerpoint, allowing for four extra checks
+                return;
+            }
+
+            newIndices.push(indexArray);
+        }
+
+        this.erase();
+        this.indices = newIndices;
+        this.draw();
+    }
+
+    move(x, y) {
+        let newIndices = [];
+    
+        for (let i = 0; i < this.indices.length; i++) {
+            let newY = this.indices[i].col + y;
+            let newX = this.indices[i].row + x;
+    
+            if (!board[newY] || board[newY][newX]) {
+                if (y != 0) {
+                    if (game.placeBuffer) {
+                        for (let i = 0; i < this.indices.length; i++) {
+                            board[this.indices[i].col][this.indices[i].row] = 1;
+                            if (!board[this.indices[i].col].includes(0)) {
+                                if (!game.linesCleared.includes(this.indices[i].col)) {
+                                    game.linesCleared.push(this.indices[i].col);
+                                }
+                            }
+                        }
+                        this.remove();
+                        game.placeBuffer = 0;
+                    } else {
+                        game.placeBuffer = 1;
+                    }
+                }
+                return;
+            } else if (newX < 0 || newX > game.dims.width - 1) {
+                return;
+            }
+    
+            newIndices.push({
+                col: newY,
+                row: newX,
+                color: this.indices[i].color
+            });
+        }
+    
+        this.erase();
+    
+        if (game.placeBuffer) game.placeBuffer = 0;
+    
+        this.indices = newIndices;
+        this.center[0] += y;
+        this.center[1] += x;
+        
+        this.draw();
+    }
+}
 
 function shadeColor(color, percent) {
     var R = parseInt(color.substring(1,3),16);
@@ -63,179 +224,29 @@ function drawPixel(pixel, color) {
     }
 }
 
-function drawPiece() {
-    for (let indices of game.piece.indices) {
-        let pixel = divBoard.children[indices.col].children[indices.row];
-        pixel.className = 'game-col';
-        pixel.style.width = `${100 / game.dims.width}%`;
-
-        drawPixel(pixel, indices.color);
-    }
-}
-
-function erasePiece() {
-    for (let indices of game.piece.indices) {
-        let pixel = divBoard.children[indices.col].children[indices.row];
-        pixel.className = 'game-col';
-        pixel.style.width = `${100 / game.dims.width}%`;
-        
-        drawPixel(pixel, '#333333');
-    }
-}
-
-function drawNext(mino) {
-    nextDiv.innerHTML = '';
+function drawInDiv(div, minoID) {
+    let mino = game.minos[minoID];
+    div.innerHTML = '';
 
     for (let i = 0; i < mino.shape.length; i++) {
-        let holdRow = document.createElement('div');
-        holdRow.className = 'hold-row';
-        holdRow.style.height = `${100 / mino.shape[i].length}%`;
+        let divRow = document.createElement('div');
+        divRow.className = 'div-row';
+        divRow.style.height = `${100 / mino.shape[i].length}%`;
 
         for (let j = 0; j < mino.shape[i].length; j++) {
-            let holdCol = document.createElement('div');
-            holdCol.className = 'hold-col';
-            holdCol.style.width = `${100 / mino.shape[i].length}%`;
+            let divCol = document.createElement('div');
+            divCol.className = 'div-col';
+            divCol.style.width = `${100 / mino.shape[i].length}%`;
 
             if (mino.shape[i][j]) {
-                drawPixel(holdCol, mino.color[mino.shape[i][j] - 1]);
+                drawPixel(divCol, mino.color[mino.shape[i][j] - 1]);
             }
 
-            holdRow.append(holdCol);
+            divRow.append(divCol);
         }
 
-        nextDiv.append(holdRow);
+        div.append(divRow);
     }
-};
-
-function setPiece() {
-    let mino;
-
-    if (!game.next) {
-        mino = game.minoes[Math.floor(Math.random() * game.minoes.length)];
-    } else {
-        mino = game.next;
-    }
-
-    game.next = game.minoes[Math.floor(Math.random() * game.minoes.length)];
-
-    drawNext(game.next);
-
-    let leftmost = Math.floor((game.dims.width - mino.shape.length) / 2);
-
-    game.timer = 0;
-    game.piece = {
-        indices: ((out = []) => {
-            for (let i = 0; i < mino.shape.length; i++) {
-                for (let j = 0; j < mino.shape.length; j++) {
-                    if (mino.shape[i][j]) {
-                        out.push({
-                            col: i, 
-                            row: j + leftmost,
-                            color: mino.color[mino.shape[i][j] - 1]
-                        });
-                        if (board[i][j + leftmost]) game.done = 'lost';
-                    }
-                }
-            }
-
-            return out;
-        })(),
-        center: [
-            (mino.shape.length - 1) / 2,
-            leftmost + (mino.shape.length - 1) / 2
-        ]
-    };
-
-    drawPiece();
-}
-
-function rotatePiece(dir, check = 0) {
-    // If I just redefined the piece indices, the code breaks; I do not know why. 
-    let newIndices = [];
-
-    for (let i = 0; i < game.piece.indices.length; i++) {
-        // Move the x and y positions of the indices to (0, 0) instead of their current center
-        let y = game.piece.indices[i].col - game.piece.center[0];
-        let x = game.piece.indices[i].row - game.piece.center[1];
-        
-        // Calculate how far away they are from the center and what angle they're at from the center
-        let scale = Math.sqrt(y * y + x * x);
-        let angle = Math.atan2(x, y);
-
-        // Rotate the x and the y pieces clockwise or widdershins
-        let indexArray = {
-            col: Math.round(scale * Math.cos(angle - dir * Math.PI / 2) + game.piece.center[0]), 
-            row: Math.round(scale * Math.sin(angle - dir * Math.PI / 2) + game.piece.center[1]),
-            color: game.piece.indices[i].color
-        };
-
-        if (
-            // The attempted rotation location exists...
-            board[indexArray.col][indexArray.row] ||
-            // or if that location is out of bounds...
-            indexArray.col < 0 || indexArray.col > game.dims.height -1 ||
-            indexArray.row < 0 || indexArray.row > game.dims.width -1 ||
-            // or if it didn't pass TTC SRS checks...
-            check > 4
-        ) {
-            // Do not rotate
-            // Implement TTC SRS by adjusting the centerpoint, allowing for four extra checks
-            return;
-        }
-
-        newIndices.push(indexArray);
-    }
-
-    erasePiece();
-    game.piece.indices = newIndices;
-    drawPiece();
-}
-
-function movePiece(x, y) {
-    let newIndices = [];
-
-    for (let i = 0; i < game.piece.indices.length; i++) {
-        let newY = game.piece.indices[i].col + y;
-        let newX = game.piece.indices[i].row + x;
-
-        if (!board[newY] || board[newY][newX]) {
-            if (y != 0) {
-                if (game.placeBuffer) {
-                    for (let i = 0; i < game.piece.indices.length; i++) {
-                        board[game.piece.indices[i].col][game.piece.indices[i].row] = 1;
-                        if (!board[game.piece.indices[i].col].includes(0)) {
-                            if (!game.linesCleared.includes(game.piece.indices[i].col)) {
-                                game.linesCleared.push(game.piece.indices[i].col);
-                            }
-                        }
-                    }
-                    game.piece = undefined;
-                    game.placeBuffer = 0;
-                } else {
-                    game.placeBuffer = 1;
-                }
-            }
-            return;
-        } else if (newX < 0 || newX > game.dims.width - 1) {
-            return;
-        }
-
-        newIndices.push({
-            col: newY,
-            row: newX,
-            color: game.piece.indices[i].color
-        });
-    }
-
-    erasePiece();
-
-    if (game.placeBuffer) game.placeBuffer = 0;
-
-    game.piece.indices = newIndices;
-    game.piece.center[0] += y;
-    game.piece.center[1] += x;
-    
-    drawPiece();
 }
 
 function pause() {
@@ -243,22 +254,25 @@ function pause() {
         divBoard.style.visibility = 'hidden';
         pauseDiv.style.visibility = 'visible';
         nextDiv.innerHTML = '';
+        holdDiv.innerHTML = '';
         game.paused = true;
     } else {
         divBoard.style.visibility = 'visible';
         pauseDiv.style.visibility = 'hidden';
-        drawNext(game.next);
+        drawInDiv(nextDiv, game.next);
+        if (game.hold != undefined) drawInDiv(holdDiv, game.hold);
         game.paused = false;    
     }
 }
 
 function gameInit(options) {
     game = options;
+    game.next = Math.floor(Math.random() * game.minos.length);
+
     board = ((out = []) => { // Merge this with the game object
         for (let i = 0; i < game.dims.height; i++) {
             out.push(new Array(game.dims.width).fill(0));
         }
-        
         return out;
     })();
     
@@ -292,8 +306,8 @@ function gameInit(options) {
         divBoard.append(row);
     }
     
-    let blankRow = divBoard.children[0].innerHTML; 
-    
+    let blankRow = divBoard.children[0].innerHTML;
+
     if (gameLoop) clearInterval(gameLoop);
     
     gameLoop = setInterval(() => {
@@ -313,14 +327,17 @@ function gameInit(options) {
                 // If the game is completed, stop the loop
                 if (game.done) clearInterval(gameLoop);
 
-                if (!game.piece) setPiece();
-                else {
+                if (!game.piece.exists()) {
+                    game.piece.set(game.next);
+                    game.next = Math.floor(Math.random() * game.minos.length);
+                    drawInDiv(nextDiv, game.next);
+                } else {
                     // Increment the timer
                     game.timer = (game.timer + 1) % 60;
 
                     // Move the piece down from time to time
                     if (game.timer % Math.round(60 / game.speed) == 0) {
-                        movePiece(0, 1);
+                        game.piece.move(0, 1);
                     }
                 }
 
@@ -455,7 +472,72 @@ let aeroMinos = [{
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     ]
+}, {
+    name: 'U',
+    color: ['#E90BC6'],
+    shape: [
+        [0, 0, 1],
+        [0, 0, 1],
+        [1, 1, 1]
+    ]
 }/*, {
+    name: 'Funyun',
+    color: ['#FF8317'], // #029457 // #462820
+    shape: [
+        [1, 1, 1, 1],
+        [1, 0, 0, 1],
+        [1, 0, 0, 1],
+        [1, 1, 1, 1]
+    ]
+}*/, {
+    name: 'O',
+    color: ['#930571'],
+    shape: [
+        [1, 1],
+        [1, 1]
+    ]
+}/*, {
+    name: 'S',
+    color: ['#923852'],
+    shape: [
+        [0, 1, 1],
+        [1, 1, 0],
+        [0, 0, 0]
+    ]
+}, {
+    name: 'Z',
+    color: ['#205983'],
+    shape: [
+        [1, 1, 0],
+        [0, 1, 1],
+        [0, 0, 0]
+    ]
+}*//*, {
+    name: 'J',
+    color: ['#9E0F22'],
+    shape: [
+        [1, 0, 0],
+        [1, 1, 1],
+        [0, 0, 0]
+    ]
+}, {
+    name: 'L',
+    color: ['#A33502'],
+    shape: [
+        [0, 0, 1],
+        [1, 1, 1],
+        [0, 0, 0]
+    ]
+}*//*, {
+    name: 'Lihns',
+    color: ['#3D9AB2'],
+    shape: [
+        [0, 0, 0, 0],
+        [1, 1, 1, 1],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0]
+    ]
+}*//*, {
     name: 'Ghostslayer',
     color: ['#F538FF', '#0DFF72'],
     shape: [
@@ -507,8 +589,8 @@ let miscMinos = [{
         [0, 0, 0, 0, 0],
         [0, 1, 1, 1, 0],
         [0, 1, 1, 1, 2],
-        [0, 1, 1, 1, 0]
-        [0, 0, 0, 0, 0],
+        [0, 1, 1, 1, 0],
+        [0, 0, 0, 0, 0]
     ]
 }, {
     name: 'K',
@@ -538,9 +620,8 @@ let miscMinos = [{
     ]
 }];
 
-
 gameInit({
-    minoes: [...standardMinos],
+    minos: [...standardMinos],
     dims: {
         width: 10,
         height: 20
@@ -548,21 +629,21 @@ gameInit({
     control: {
         left: {
             execute: () => {
-                movePiece(-1, 0);
+                game.piece.move(-1, 0);
             },
             key: 'a',
             pressed: 0
         },
         right: {
             execute: () => {
-                movePiece(1, 0);
+                game.piece.move(1, 0);
             },
             key: 'd',
             pressed: 0
         },
         hdrop: {
             execute: () => {
-                while (game.piece) movePiece(0, 1);
+                while (game.piece.exists()) game.piece.move(0, 1);
             },
             key: 'w',
             pressed: 0,
@@ -570,14 +651,14 @@ gameInit({
         },
         down: {
             execute: () => {
-                movePiece(0, 1);
+                game.piece.move(0, 1);
             },
             key: 's',
             pressed: 0
         },
         ccw: {
             execute: () => {
-                rotatePiece(-1);
+                game.piece.rotate(-1);
             },
             key: 'j',
             pressed: 0,
@@ -585,7 +666,7 @@ gameInit({
         },
         cw: {
             execute: () => {
-                rotatePiece(1);
+                game.piece.rotate(1);
             },
             key: 'k',
             pressed: 0,
@@ -598,11 +679,26 @@ gameInit({
             key: 'Enter',
             pressed: 0,
             buffer: 0
+        },
+        hold: {
+            execute: () => {
+                let holdTemp = game.hold;
+                game.hold = game.piece.index;
+                game.piece.erase();
+                drawInDiv(holdDiv, game.hold);
+                
+                if (holdTemp == undefined) game.piece.remove();
+                else game.piece.set(holdTemp);
+            },
+            key: 'q',
+            pressed: 0,
+            buffer: 0
         }
     },
     linesCleared: [],
-    piece: undefined,
+    piece: new Piece(),
     next: undefined,
+    hold: undefined,
     done: undefined,
     paused: false,
     placeBuffer: 0,
