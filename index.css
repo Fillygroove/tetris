@@ -307,3 +307,20 @@ ul, ol {
     height: 100%;
     display: inline-block;
 }
+
+#next-col {
+    background-color: #333;
+    border: 2px #222 solid;
+    margin-top: 10px;
+    border-radius: 5px;
+    height: 378.5px;
+}
+
+.next-display {
+    height: 60px;
+    width: 60px;
+    left: 50%;
+    translate: -50%;
+    position: relative;
+    padding: 8px;
+}

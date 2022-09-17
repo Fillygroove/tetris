@@ -252,7 +252,13 @@ function drawInDiv(div, minoID) {
 
 function drawNext() {
     if (nextDiv) {
-        drawInDiv(nextDiv, game.next);
+        drawInDiv(nextDiv, game.next[0]);
+
+        if (config.nextAmount > 1) {
+            for (let i = 1; i < config.nextAmount; i++) {
+                drawInDiv(document.getElementById(`next${i}`), game.next[i]);
+            }
+        }
     }
 }
 
@@ -267,7 +273,15 @@ function pause() {
         divBoard.style.visibility = 'hidden';
         pauseDiv.style.visibility = 'visible';
 
-        if (nextDiv) nextDiv.innerHTML = '';
+        if (nextDiv) {
+            nextDiv.innerHTML = '';
+
+            if (config.nextAmount > 1) {
+                for (let i = 1; i < config.nextAmount; i++) {
+                    document.getElementById(`next${i}`).innerHTML = '';
+                }
+            }
+        }
         if (holdDiv) holdDiv.innerHTML = '';
 
         game.paused = true;
@@ -291,7 +305,12 @@ function resetGame() {
         })(),
         linesCleared: [],
         piece: new Piece(),
-        next: Math.floor(Math.random() * config.minos.length),
+        next: ((out = []) => {
+            for (let i = 0; i < (config.nextAmount || 1); i++) {
+                out.push(Math.floor(Math.random() * config.minos.length));
+            }
+            return out;
+        })(),
         hold: undefined,
         done: undefined,
         paused: false,
@@ -348,7 +367,9 @@ function resetGame() {
         document.getElementById('left-wrapper').append(holdText, holdDiv);
     } else document.getElementById('left-wrapper').innerHTML = '';
 
-    // If next count is above 0, add 
+    let rightWrapper = document.getElementById('right-wrapper');
+
+    // If next count is above 0, add next piece indicators
     if (config.nextAmount) {
         let nextText = document.createElement('p');
         nextText.id = 'div-text';
@@ -357,8 +378,27 @@ function resetGame() {
         nextDiv = document.createElement('div');
         nextDiv.id = 'hold-main';
 
-        document.getElementById('right-wrapper').append(nextText, nextDiv);
-    } else document.getElementById('right-wrapper').innerHTML = '';
+        rightWrapper.append(nextText, nextDiv);
+
+        // If next count is above 1, add array of piece displays
+        if (config.nextAmount > 1) {
+            let nextCol = document.createElement('div');
+            nextCol.id = 'next-col';
+
+            for (let i = 1; i < config.nextAmount; i++) {
+                let nextDisplay = document.createElement('div');
+                nextDisplay.className = 'next-display';
+                nextDisplay.id = `next${i}`;
+
+                drawInDiv(nextDisplay, game.next[i]);
+
+                nextCol.append(nextDisplay);
+            }
+
+            rightWrapper.append(nextCol);
+        }
+
+    } else rightWrapper.innerHTML = '';
     
     /*
         <p id="div-text">Hold</p>
@@ -389,8 +429,8 @@ function gameInit(options = config) {
                 if (game.done) clearInterval(gameLoop);
 
                 if (!game.piece.exists()) {
-                    game.piece.set(game.next);
-                    game.next = Math.floor(Math.random() * config.minos.length);
+                    game.piece.set(game.next.shift());
+                    game.next.push(Math.floor(Math.random() * config.minos.length));
                     drawNext();
                 } else {
                     // Increment the timer
@@ -760,5 +800,5 @@ gameInit({
     minos: [...standardMinos],
     garbage: 0,
     enableHold: true,
-    nextAmount: 1
+    nextAmount: 6
 });
