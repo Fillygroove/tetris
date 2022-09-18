@@ -295,30 +295,6 @@ function pause() {
 }
 
 function resetGame() {
-    // Set game object back to defaults, based off of the configuated inputs
-    game = {
-        board: ((out = []) => {
-            for (let i = 0; i < config.dims.height; i++) {
-                out.push(new Array(config.dims.width).fill(0));
-            }
-            return out;
-        })(),
-        linesCleared: [],
-        piece: new Piece(),
-        next: ((out = []) => {
-            for (let i = 0; i < (config.nextAmount || 1); i++) {
-                out.push(Math.floor(Math.random() * config.minos.length));
-            }
-            return out;
-        })(),
-        hold: undefined,
-        done: undefined,
-        paused: false,
-        placeBuffer: 0,
-        timer: 0,
-        speed: 2
-    };
-
     // Change the aspect ratio of the board based on the width and height
     if (config.dims.width / config.dims.height > 2) {
         divBoard.style.width = pauseDiv.style.width = `100%`;
@@ -354,6 +330,76 @@ function resetGame() {
     
     // Define the blank row used for line clears (this is lazy and needs a rewrite)
     blankRow = divBoard.children[0].innerHTML;
+
+    // Set game object back to defaults, based off of the configuated inputs
+    game = {
+        board: ((out = []) => {
+            for (let i = 0; i < config.dims.height; i++) {
+                out.push((() => {
+                    let rowArr = new Array(config.dims.width).fill(0);
+
+                    if (// If there is garbage...
+                        i > config.dims.height - config.garbage.lines - 1 &&
+                        // and if the garbage values are properly defined
+                        !(config.garbage.holes + config.garbage.erode > config.dims.width || config.garbage.holes - config.garbage.erode < 1)
+                    ) {
+                        let plusOrMinus = 2 * (Math.floor(Math.random() * 2) + 1) - 3;
+                        let erosion = Math.floor(Math.random() * (config.garbage.erode + 1));
+
+                        console.log(config.garbage.holes + plusOrMinus * erosion);
+
+                        let skipOver = ((out = new Array(config.garbage.holes + plusOrMinus * erosion)) => {
+                            for (let i = 0; i < out.length; i++) {
+                                let outRand = Math.floor(Math.random() * config.dims.width);
+                                if (out.includes(outRand)) i--;
+                                else out[i] = outRand;
+                            }
+                            return out;
+                        })();
+
+                        for (let j = 0; j < config.dims.width; j++) {
+                            if (!skipOver.includes(j)) {
+                                let garbColor = (() => {
+                                    let color = config.garbage.color;
+
+                                    switch (config.garbage.color) {
+                                        case 'random':
+                                            color = config.minos[Math.floor(Math.random() * config.minos.length)];
+                                            return color.color[Math.floor(Math.random() * color.color.length)];
+                                        case 'darkRandom':
+                                            color = config.minos[Math.floor(Math.random() * config.minos.length)];
+                                            return shadeColor(color.color[Math.floor(Math.random() * color.color.length)], -40);
+                                        default:
+                                            return color;
+                                    }
+                                })();
+
+                                drawPixel(divBoard.children[i].children[j], garbColor);
+                                rowArr[j] = 1;
+                            }
+                        }
+                    }
+
+                    return rowArr;
+                })());
+            }
+            return out;
+        })(),
+        linesCleared: [],
+        piece: new Piece(),
+        next: ((out = []) => {
+            for (let i = 0; i < (config.nextAmount || 1); i++) {
+                out.push(Math.floor(Math.random() * config.minos.length));
+            }
+            return out;
+        })(),
+        hold: undefined,
+        done: undefined,
+        paused: false,
+        placeBuffer: 0,
+        timer: 0,
+        speed: 2
+    };
 
     // If hold is enabled, add it
     if (config.enableHold) {
@@ -399,11 +445,6 @@ function resetGame() {
         }
 
     } else rightWrapper.innerHTML = '';
-    
-    /*
-        <p id="div-text">Hold</p>
-        <div id="hold-main"></div>
-    */
 }
 
 function gameInit(options = config) {
@@ -574,12 +615,19 @@ let aeroMinos = [{
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     ]
 }, {
-    name: 'U',
+    name: 'V',
     color: ['#E90BC6'],
     shape: [
         [0, 0, 1],
         [0, 0, 1],
         [1, 1, 1]
+    ]
+}, {
+    name: 'O',
+    color: ['#930571'],
+    shape: [
+        [1, 1],
+        [1, 1]
     ]
 }/*, {
     name: 'Funyun',
@@ -590,14 +638,7 @@ let aeroMinos = [{
         [1, 0, 0, 1],
         [1, 1, 1, 1]
     ]
-}*/, {
-    name: 'O',
-    color: ['#930571'],
-    shape: [
-        [1, 1],
-        [1, 1]
-    ]
-}/*, {
+}, {
     name: 'S',
     color: ['#923852'],
     shape: [
@@ -613,7 +654,7 @@ let aeroMinos = [{
         [0, 1, 1],
         [0, 0, 0]
     ]
-}*//*, {
+}, {
     name: 'J',
     color: ['#9E0F22'],
     shape: [
@@ -629,7 +670,7 @@ let aeroMinos = [{
         [1, 1, 1],
         [0, 0, 0]
     ]
-}*//*, {
+}, {
     name: 'Lihns',
     color: ['#3D9AB2'],
     shape: [
@@ -638,7 +679,7 @@ let aeroMinos = [{
         [0, 0, 0, 0],
         [0, 0, 0, 0]
     ]
-}*//*, {
+}, {
     name: 'Ghostslayer',
     color: ['#F538FF', '#0DFF72'],
     shape: [
@@ -703,6 +744,14 @@ let miscMinos = [{
         [1, 0, 1, 0]
     ]
 }, {
+    name: 'logo',
+    color: ['#FF8833', '#FF88EE', '#FEFCBB', '#01F001'],
+    shape: [
+        [0, 3, 0],
+        [1, 2, 4],
+        [0, 0, 0]
+    ]
+}, {
     name: `Drifter's Piece`,
     color: ['#72A8FE'],
     shape: [
@@ -712,12 +761,46 @@ let miscMinos = [{
         [1, 0, 0, 0]
     ]
 }, {
-    name: 'logo',
-    color: ['#FF8833', '#FF88EE', '#FEFCBB', '#01F001'],
+    name: `Seasons' Piece`,
+    color: ['#B7B7B7', '#999999', '#666666'],
     shape: [
-        [0, 3, 0],
-        [1, 2, 4],
-        [0, 0, 0]
+        [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+        [0, 2, 0, 2, 2, 2, 2, 0, 2, 0],
+        [2, 0, 2, 0, 3, 3, 0, 2, 0, 2],
+        [2, 0, 2, 0, 3, 3, 0, 2, 0, 2],
+        [2, 0, 2, 0, 3, 3, 0, 2, 0, 2],
+        [0, 2, 2, 2, 2, 2, 2, 2, 2, 0],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ]
+}, {
+    name: 'Ґ', // thanks, Cortik
+    color: ['#5555f5'],
+    shape: [
+        [1, 1, 0, 0],
+        [0, 1, 1, 1],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0]
+    ]
+}, {
+    name: 'Blitty',
+    color: ['#FCFABA'],
+    shape: [
+        [1, 1, 1],
+        [1, 1, 1],
+        [1, 1, 1]
+    ]
+}, {
+    name: 'Broggy',
+    color: ['#FCCB3C'],
+    shape: [
+        [1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1]
     ]
 }];
 
@@ -798,7 +881,12 @@ gameInit({
         height: 20
     },
     minos: [...standardMinos],
-    garbage: 0,
+    garbage: {
+        color: '#999999',
+        lines: 8,
+        holes: 6,
+        erode: 2
+    },
     enableHold: true,
     nextAmount: 6
 });
