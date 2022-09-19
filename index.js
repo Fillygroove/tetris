@@ -49,7 +49,9 @@ class Piece {
     drawShadow() {
         if (config.pieceShadows) {
             let shadow = ((out = []) => {
-                for (let i = 0; i < this.indices.length; i++) out.push(this.indices[i].col);
+                for (let i = 0; i < this.indices.length; i++) {
+                    out.push(this.indices[i].col);
+                }
                 return out;
             })();
             let indices = this.indices;
@@ -60,8 +62,9 @@ class Piece {
                 for (let i = 0; i < shadow.length; i++) {
                     let newY = shadow[i] + 1;
 
-                    if (newY > config.dims.height - 1 || game.board[newY][indices[i].row]) return;
-                    else newIndices.push(newY);
+                    if (newY > config.dims.height - 1 || game.board[newY][indices[i].row]) {
+                        return;
+                    } else newIndices.push(newY);
                 }
 
                 shadow = newIndices;
@@ -75,8 +78,8 @@ class Piece {
                 let pixel = divBoard.children[this.shadow[i]].children[this.indices[i].row];
                 pixel.className = 'game-col';
                 pixel.style.width = `${100 / config.dims.width}%`;
-        
-                drawPixel(pixel, this.indices[i].color + '40');
+
+                drawPixel(pixel, this.indices[i].color + '40', true);
             }
         }
     }
@@ -173,9 +176,7 @@ class Piece {
                 game.board[indexArray.col][indexArray.row] ||
                 // or if that location is out of bounds...
                 indexArray.col < 0 || indexArray.col > config.dims.height -1 ||
-                indexArray.row < 0 || indexArray.row > config.dims.width -1 ||
-                // or if it didn't pass TTC SRS checks...
-                check > 4
+                indexArray.row < 0 || indexArray.row > config.dims.width -1
             ) {
                 // Do not rotate
                 // Implement TTC SRS by adjusting the centerpoint, allowing for four extra checks
@@ -259,19 +260,16 @@ function shadeColor(color, percent) {
     return "#"+RR+GG+BB+A;
 }
 
-function drawPixel(pixel, color) {
-    // Kill the child.
+function drawPixel(pixel, color, isGhost = false) {
     pixel.innerHTML = '';
     pixel.style.backgroundColor = color;
 
-    // Utter jank. I should base it off of tetromino index and not color.
-    if (pixel.children.length == 0) {
-        let mino = document.createElement('div');
-        mino.className = 'game-mino';
-        mino.style.backgroundColor = color;
+    let mino = document.createElement('div');
+    mino.className = 'game-mino';
+    mino.style.backgroundColor = color;
+    if (isGhost) mino.style.border = `3px ${shadeColor(color + '40', 100)} dashed`;
 
-        pixel.append(mino);
-    }
+    pixel.append(mino);
 
     if (color != '') pixel.style.backgroundColor = shadeColor(color, -40);
 }
