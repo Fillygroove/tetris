@@ -1,4 +1,5 @@
-let divBoard = document.getElementById('board');
+let board = document.getElementById('board');
+let divBoard = document.getElementById('game-board');
 let pauseDiv = document.getElementById('pause');
 let nextDiv = document.getElementById('next-main');
 let holdDiv;
@@ -319,8 +320,8 @@ function drawHold() {
 
 function pause() {
     if (!game.paused) {
-        divBoard.style.visibility = 'hidden';
-        pauseDiv.style.visibility = 'visible';
+        divBoard.style.display = 'none';
+        pauseDiv.style.display = 'initial';
 
         if (nextDiv) {
             nextDiv.innerHTML = '';
@@ -335,8 +336,8 @@ function pause() {
 
         game.paused = true;
     } else {
-        divBoard.style.visibility = 'visible';
-        pauseDiv.style.visibility = 'hidden';
+        divBoard.style.display = '';
+        pauseDiv.style.display = 'none';
         drawNext();
         drawHold();
         game.paused = false;    
@@ -345,18 +346,17 @@ function pause() {
 
 function resetGame() {
     // Change the aspect ratio of the board based on the width and height
+    
     if (config.dims.width / config.dims.height > 2) {
-        divBoard.style.width = pauseDiv.style.width = `100%`;
-        divBoard.style.height = pauseDiv.style.height = `${50 * config.dims.height / config.dims.width}%`;
+        board.style.width = `100%`;
+        board.style.height = `${50 * config.dims.height / config.dims.width}%`;
     } else {
-        divBoard.style.width = pauseDiv.style.width = `${200 * config.dims.width / config.dims.height}%`;
-        divBoard.style.height = pauseDiv.style.height = `100%`;
+        board.style.width = `${200 * config.dims.width / config.dims.height}%`;
+        board.style.height = `100%`;
     }
     
     // Just in case there is anything displayed on the board, remove it
     divBoard.innerHTML = '';
-    divBoard.style.visibility = 'visible';
-    pauseDiv.style.visibility = 'hidden';
 
     // Add the required elements to the board
     for (let i = 0; i < config.dims.height; i++) {
@@ -445,8 +445,13 @@ function resetGame() {
         paused: false,
         placeBuffer: 0,
         timer: 0,
-        speed: 2
+        level: -1,
+        score: 0,
+        linesClearedOverall: 10,
+        speed: undefined
     };
+
+    nextLevel();
 
     // If hold is enabled, add it
     if (config.enableHold) {
@@ -494,6 +499,41 @@ function resetGame() {
     } else rightWrapper.innerHTML = '';
 }
 
+function getSpeed() {
+    switch (config.algorithm) {
+        case 'nes':
+            if (game.level / 8 <= 1) return -5 * game.level + 48;
+            if (game.level == 9) return 6;
+            if ((game.level - 10) / 2 <= 1) return 5;
+            if ((game.level - 13) / 2 <= 1) return 4;
+            if ((game.level - 16) / 2 <= 1) return 3;
+            if ((game.level - 19) / 9 <= 1) return 2;
+            return 1;
+    }
+}
+
+function getScoreFromLines() {
+    switch (config.algorithm) {
+        case 'nes':
+            if (game.linesCleared.length / 3 <= 1) {
+                return 200 * game.linesCleared.length - 100;
+            } else return 800;
+    }
+}
+
+function updateScore() {
+    document.getElementById('score').innerHTML = `Score: ${String(game.score).padStart(8, 0)}`;
+}
+
+function nextLevel() {
+    game.timer = 0;
+    game.level++;
+    game.speed = getSpeed();
+    game.linesClearedOverall = 0;
+    document.getElementById('level').innerHTML = `Lvl ${game.level}&nbsp;`;
+    updateScore();
+}
+
 function gameInit(options = config) {
     config = options;
     resetGame();
@@ -522,10 +562,10 @@ function gameInit(options = config) {
                     drawNext();
                 } else {
                     // Increment the timer
-                    game.timer = (game.timer + 1) % 60;
+                    game.timer = (game.timer + 1) % game.speed;
 
                     // Move the piece down from time to time
-                    if (game.timer % Math.round(60 / game.speed) == 0) {
+                    if (game.timer == 0) {
                         game.piece.move(0, 1);
                     }
                 }
@@ -564,6 +604,13 @@ function gameInit(options = config) {
                         game.board[j].fill(0);
                     }
                 }
+
+                game.linesClearedOverall += game.linesCleared.length;
+                game.score += getScoreFromLines();
+                updateScore();
+
+                // If you have enough score to go to the next level...
+                if (game.linesClearedOverall >= 10) nextLevel();
 
                 game.linesCleared = [];
             }
@@ -930,11 +977,12 @@ gameInit({
     minos: [...standardMinos],
     garbage: {
         color: '#999999',
-        lines: 8,
+        lines: 5,
         holes: 6,
         erode: 2
     },
     enableHold: true,
     nextAmount: 6,
-    pieceShadows: true
+    pieceShadows: true,
+    algorithm: 'nes'
 });
