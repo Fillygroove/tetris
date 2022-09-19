@@ -31,9 +31,55 @@ class Piece {
         this.indices;
         this.center;
         this.index;
+        this.shadow;
     }
     
+    eraseShadow() {
+        if (config.pieceShadows) {
+            for (let i = 0; i < this.shadow.length; i++) {
+                let pixel = divBoard.children[this.shadow[i]].children[this.indices[i].row];
+                pixel.className = 'game-col';
+                pixel.style.width = `${100 / config.dims.width}%`;
+        
+                drawPixel(pixel, '#333333');
+            }
+        }
+    }
+
+    drawShadow() { // Find a way to rewrite this because WOW this is bad...
+        if (config.pieceShadows) {
+            let escapeWhileLoop = true;
+            this.shadow = ((out = []) => {
+                for (let i = 0; i < this.indices.length; i++) out.push(this.indices[i].col);
+                return out;
+            })();
+
+            while (escapeWhileLoop) {
+                let newIndices = [];
+                for (let i = 0; i < this.shadow.length; i++) {
+                    let newY = this.shadow[i] + 1;
+
+                    if (newY > config.dims.height - 1 || game.board[newY][this.indices[i].row]) {
+                        escapeWhileLoop = false;
+                        break;
+                    } else newIndices.push(newY);
+                }
+                if (escapeWhileLoop) this.shadow = newIndices;
+            }
+
+            for (let i = 0; i < this.shadow.length; i++) {
+                let pixel = divBoard.children[this.shadow[i]].children[this.indices[i].row];
+                pixel.className = 'game-col';
+                pixel.style.width = `${100 / config.dims.width}%`;
+        
+                drawPixel(pixel, shadeColor(this.indices[i].color, -80));
+            }
+        }
+    }
+
     draw() {
+        this.drawShadow();
+
         for (let indices of this.indices) {
             let pixel = divBoard.children[indices.col].children[indices.row];
             pixel.className = 'game-col';
@@ -44,6 +90,8 @@ class Piece {
     }
     
     erase() {
+        this.eraseShadow();
+        
         for (let indices of this.indices) {
             let pixel = divBoard.children[indices.col].children[indices.row];
             pixel.className = 'game-col';
@@ -173,9 +221,9 @@ class Piece {
                 color: this.indices[i].color
             });
         }
-    
+        
         this.erase();
-    
+
         if (game.placeBuffer) game.placeBuffer = 0;
     
         this.indices = newIndices;
@@ -345,8 +393,6 @@ function resetGame() {
                     ) {
                         let plusOrMinus = 2 * (Math.floor(Math.random() * 2) + 1) - 3;
                         let erosion = Math.floor(Math.random() * (config.garbage.erode + 1));
-
-                        console.log(config.garbage.holes + plusOrMinus * erosion);
 
                         let skipOver = ((out = new Array(config.garbage.holes + plusOrMinus * erosion)) => {
                             for (let i = 0; i < out.length; i++) {
@@ -629,68 +675,7 @@ let aeroMinos = [{
         [1, 1],
         [1, 1]
     ]
-}/*, {
-    name: 'Funyun',
-    color: ['#FF8317'], // #029457 // #462820
-    shape: [
-        [1, 1, 1, 1],
-        [1, 0, 0, 1],
-        [1, 0, 0, 1],
-        [1, 1, 1, 1]
-    ]
-}, {
-    name: 'S',
-    color: ['#923852'],
-    shape: [
-        [0, 1, 1],
-        [1, 1, 0],
-        [0, 0, 0]
-    ]
-}, {
-    name: 'Z',
-    color: ['#205983'],
-    shape: [
-        [1, 1, 0],
-        [0, 1, 1],
-        [0, 0, 0]
-    ]
-}, {
-    name: 'J',
-    color: ['#9E0F22'],
-    shape: [
-        [1, 0, 0],
-        [1, 1, 1],
-        [0, 0, 0]
-    ]
-}, {
-    name: 'L',
-    color: ['#A33502'],
-    shape: [
-        [0, 0, 1],
-        [1, 1, 1],
-        [0, 0, 0]
-    ]
-}, {
-    name: 'Lihns',
-    color: ['#3D9AB2'],
-    shape: [
-        [0, 0, 0, 0],
-        [1, 1, 1, 1],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0]
-    ]
-}, {
-    name: 'Ghostslayer',
-    color: ['#F538FF', '#0DFF72'],
-    shape: [
-        [0, 1, 1, 1, 0, 0],
-        [1, 1, 1, 1, 1, 0],
-        [1, 2, 1, 2, 1, 0],
-        [1, 1, 1, 1, 1, 0],
-        [1, 1, 1, 1, 1, 0],
-        [1, 1, 0, 1, 1, 0]
-    ]
-}*/];
+}];
 let miscMinos = [{
     name: 'O',
     color: ['#F1F000'],
@@ -802,6 +787,67 @@ let miscMinos = [{
         [1, 1, 1, 1, 1],
         [1, 1, 1, 1, 1]
     ]
+}, {
+    name: 'Funyun',
+    color: ['#FF8317'], // #029457 // #462820
+    shape: [
+        [1, 1, 1, 1],
+        [1, 0, 0, 1],
+        [1, 0, 0, 1],
+        [1, 1, 1, 1]
+    ]
+}, {
+    name: 'S',
+    color: ['#923852'],
+    shape: [
+        [0, 1, 1],
+        [1, 1, 0],
+        [0, 0, 0]
+    ]
+}, {
+    name: 'Z',
+    color: ['#205983'],
+    shape: [
+        [1, 1, 0],
+        [0, 1, 1],
+        [0, 0, 0]
+    ]
+}, {
+    name: 'J',
+    color: ['#9E0F22'],
+    shape: [
+        [1, 0, 0],
+        [1, 1, 1],
+        [0, 0, 0]
+    ]
+}, {
+    name: 'L',
+    color: ['#A33502'],
+    shape: [
+        [0, 0, 1],
+        [1, 1, 1],
+        [0, 0, 0]
+    ]
+}, {
+    name: 'Lihns',
+    color: ['#3D9AB2'],
+    shape: [
+        [0, 0, 0, 0],
+        [1, 1, 1, 1],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0]
+    ]
+}, {
+    name: 'Ghostslayer',
+    color: ['#F538FF', '#0DFF72'],
+    shape: [
+        [0, 1, 1, 1, 0, 0],
+        [1, 1, 1, 1, 1, 0],
+        [1, 2, 1, 2, 1, 0],
+        [1, 1, 1, 1, 1, 0],
+        [1, 1, 1, 1, 1, 0],
+        [1, 1, 0, 1, 1, 0]
+    ]
 }];
 
 gameInit({
@@ -883,10 +929,11 @@ gameInit({
     minos: [...standardMinos],
     garbage: {
         color: '#999999',
-        lines: 8,
+        lines: 5,
         holes: 6,
         erode: 2
     },
     enableHold: true,
-    nextAmount: 6
+    nextAmount: 6,
+    pieceShadows: true
 });
