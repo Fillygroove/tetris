@@ -1,7 +1,7 @@
 let board = document.getElementById('board');
 let divBoard = document.getElementById('game-board');
 let pauseDiv = document.getElementById('pause');
-let nextDiv = document.getElementById('next-main');
+let nextDiv;
 let holdDiv;
 let gameLoop;
 let game;
@@ -10,7 +10,7 @@ let blankRow;
 
 document.addEventListener("keydown", (e) => {
     for (let key in config.control) {
-        if (config.control[key].key == e.key) {
+        if (config.control[key].key == e.key.toLowerCase()) {
             if (!config.control[key].buffer) {
                 config.control[key].pressed = 1;
             }
@@ -20,7 +20,7 @@ document.addEventListener("keydown", (e) => {
 
 document.addEventListener("keyup", (e) => {
     for (let key in config.control) {
-        if (config.control[key].key == e.key) {
+        if (config.control[key].key == e.key.toLowerCase()) {
             config.control[key].pressed = 0;
             config.control[key].buffer = config.control[key].buffer == undefined ? undefined : 0;
         }
@@ -80,7 +80,7 @@ class Piece {
                 pixel.className = 'game-col';
                 pixel.style.width = `${100 / config.dims.width}%`;
 
-                drawPixel(pixel, this.indices[i].color + '40', true);
+                drawPixel(pixel, this.indices[i].color + '20', true);
             }
         }
     }
@@ -123,6 +123,46 @@ class Piece {
         if (this.exists()) this.erase();
 
         let mino = config.minos[minoID];
+
+        if (Math.random() * 100 + 1 <= config.heavenChance) {
+            let firstRowWithPieces = 0;
+
+            while (!game.board[firstRowWithPieces].includes(1) && firstRowWithPieces < config.dims.height - 1) {
+                firstRowWithPieces++;
+            }
+
+            let heavenShape = ((out = []) => {
+                out.push(new Array(config.dims.width).fill(1));
+                
+                let firstRow = game.board[firstRowWithPieces];
+                let indices = [];
+
+                for (let i = 0; i < firstRow.length; i++) {
+                    if (!firstRow[i]) indices.push(i);
+                }
+
+                for (let i = 0; i < config.dims.width - 1; i++) {
+                    let row = new Array(config.dims.width).fill(0);
+                    if (firstRowWithPieces + i < config.dims.height && indices.length < config.dims.width) {
+                        for (let j = 0; j < indices.length; j++) {
+                            if (game.board[firstRowWithPieces + i][indices[j]]) {
+                                indices.splice(j, 1);
+                                j--;
+                            } else row[indices[j]] = 1;
+                        }
+                    }
+                    out.push(row);
+                }
+                return out;
+            })();
+
+            mino = {
+                name: 'Heaven',
+                color: ['#F23C0D'],
+                shape: heavenShape
+            }
+        }
+
         let leftmost = Math.floor((config.dims.width - mino.shape.length) / 2);
     
         this.indices = ((out = []) => {
@@ -302,12 +342,8 @@ function drawInDiv(div, minoID) {
 
 function drawNext() {
     if (nextDiv) {
-        drawInDiv(nextDiv, game.next[0]);
-
-        if (config.nextAmount > 1) {
-            for (let i = 1; i < config.nextAmount; i++) {
-                drawInDiv(document.getElementById(`next${i}`), game.next[i]);
-            }
+        for (let i = 0; i < config.nextAmount; i++) {
+            drawInDiv(document.getElementById(`next${i}`), game.next[i]);
         }
     }
 }
@@ -318,18 +354,49 @@ function drawHold() {
     }
 }
 
+function getSpeed() {
+    switch (config.algorithm) {
+        case 'nes':
+            if (game.level / 8 <= 1) return -5 * game.level + 48;
+            if (game.level == 9) return 6;
+            if ((game.level - 10) / 2 <= 1) return 5;
+            if ((game.level - 13) / 2 <= 1) return 4;
+            if ((game.level - 16) / 2 <= 1) return 3;
+            if ((game.level - 19) / 9 <= 1) return 2;
+            return 1;
+    }
+}
+
+function getScoreFromLines() {
+    switch (config.algorithm) {
+        case 'nes':
+            if (game.linesCleared.length / 3 <= 1) {
+                return 200 * game.linesCleared.length - 100;
+            } else return 800;
+    }
+}
+
+function updateScore() {
+    document.getElementById('score').innerHTML = `Score: ${String(game.score).padStart(6, 0)}`;
+}
+
+function nextLevel() {
+    game.timer = 0;
+    game.level++;
+    game.speed = getSpeed();
+    game.linesClearedOverall = 0;
+    document.getElementById('level').innerHTML = `Lvl ${game.level}&nbsp;`;
+    updateScore();
+}
+
 function pause() {
     if (!game.paused) {
         divBoard.style.display = 'none';
         pauseDiv.style.display = 'initial';
 
         if (nextDiv) {
-            nextDiv.innerHTML = '';
-
-            if (config.nextAmount > 1) {
-                for (let i = 1; i < config.nextAmount; i++) {
-                    document.getElementById(`next${i}`).innerHTML = '';
-                }
+            for (let i = 0; i < config.nextAmount; i++) {
+                document.getElementById(`next${i}`).innerHTML = '';
             }
         }
         if (holdDiv) holdDiv.innerHTML = '';
@@ -346,7 +413,6 @@ function pause() {
 
 function resetGame() {
     // Change the aspect ratio of the board based on the width and height
-    
     if (config.dims.width / config.dims.height > 2) {
         board.style.width = `100%`;
         board.style.height = `${50 * config.dims.height / config.dims.width}%`;
@@ -451,87 +517,43 @@ function resetGame() {
         speed: undefined
     };
 
-    nextLevel();
+    let leftWrapper = document.getElementById('left-wrapper');
+    leftWrapper.innerHTML = '';
 
     // If hold is enabled, add it
     if (config.enableHold) {
-        let holdText = document.createElement('p');
-        holdText.id = 'div-text';
-        holdText.innerHTML = 'Hold';
-
         holdDiv = document.createElement('div');
-        holdDiv.id = 'hold-main';
+        holdDiv.className = 'piece-holder';
 
-        document.getElementById('left-wrapper').append(holdText, holdDiv);
-    } else document.getElementById('left-wrapper').innerHTML = '';
+        leftWrapper.append(holdDiv);
+    }
 
+/*    let levelDiv = document.createElement('div');
+    levelDiv.id = 'level';
+    leftWrapper.append(levelDiv);
+*/
     let rightWrapper = document.getElementById('right-wrapper');
+    rightWrapper.innerHTML = '';
 
     // If next count is above 0, add next piece indicators
     if (config.nextAmount) {
-        let nextText = document.createElement('p');
-        nextText.id = 'div-text';
-        nextText.innerHTML = 'Next';
-
         nextDiv = document.createElement('div');
-        nextDiv.id = 'hold-main';
+        nextDiv.id = 'next-holder';
 
-        rightWrapper.append(nextText, nextDiv);
+        for (let i = 0; i < config.nextAmount; i++) {
+            let nextDisplay = document.createElement('div');
+            nextDisplay.className = 'next-display';
+            nextDisplay.id = `next${i}`;
 
-        // If next count is above 1, add array of piece displays
-        if (config.nextAmount > 1) {
-            let nextCol = document.createElement('div');
-            nextCol.id = 'next-col';
+            drawInDiv(nextDisplay, game.next[i]);
 
-            for (let i = 1; i < config.nextAmount; i++) {
-                let nextDisplay = document.createElement('div');
-                nextDisplay.className = 'next-display';
-                nextDisplay.id = `next${i}`;
-
-                drawInDiv(nextDisplay, game.next[i]);
-
-                nextCol.append(nextDisplay);
-            }
-
-            rightWrapper.append(nextCol);
+            nextDiv.append(nextDisplay);
         }
 
-    } else rightWrapper.innerHTML = '';
-}
-
-function getSpeed() {
-    switch (config.algorithm) {
-        case 'nes':
-            if (game.level / 8 <= 1) return -5 * game.level + 48;
-            if (game.level == 9) return 6;
-            if ((game.level - 10) / 2 <= 1) return 5;
-            if ((game.level - 13) / 2 <= 1) return 4;
-            if ((game.level - 16) / 2 <= 1) return 3;
-            if ((game.level - 19) / 9 <= 1) return 2;
-            return 1;
+        rightWrapper.append(nextDiv);
     }
-}
 
-function getScoreFromLines() {
-    switch (config.algorithm) {
-        case 'nes':
-            if (game.linesCleared.length / 3 <= 1) {
-                return 200 * game.linesCleared.length - 100;
-            } else return 800;
-    }
-}
-
-function updateScore() {
-    document.getElementById('score').innerHTML = `Score: ${String(game.score).padStart(8, 0)}`;
-}
-
-function nextLevel() {
-    game.timer = 0;
-    game.level++;
-    game.speed = getSpeed();
-    game.linesClearedOverall = 0;
-    document.getElementById('level').innerHTML = `Lvl ${game.level}&nbsp;`;
-    updateScore();
+    nextLevel();
 }
 
 function gameInit(options = config) {
@@ -896,8 +918,57 @@ let miscMinos = [{
         [1, 1, 1, 1, 1, 0],
         [1, 1, 0, 1, 1, 0]
     ]
+}, {
+    name: '',
+    color: ['#f23c0d'],
+    shape: [
+        [0, 1, 0],
+        [1, 0, 1],
+        [0, 0, 0]
+    ]
+}, {
+    name: 'amogus',
+    color: ['#FF0000', '#00F0F1'],
+    shape: [
+        [0, 1, 1, 1],
+        [1, 1, 2, 2],
+        [1, 1, 1, 1],
+        [0, 1, 0, 1]
+    ]
 }];
-
+let triMinos = [{
+    name: '',
+    color: ['#f23c0d'],
+    shape: [
+        [0, 1, 0],
+        [1, 1, 0],
+        [0, 0, 0]
+    ]
+}, {
+    name: '',
+    color: ['#f23c0d'],
+    shape: [
+        [0, 0, 0],
+        [1, 1, 1],
+        [0, 0, 0]
+    ]
+}, {
+    name: '',
+    color: ['#f23c0d'],
+    shape: [
+        [1, 0, 0],
+        [0, 1, 1],
+        [0, 0, 0]
+    ]
+}, {
+    name: '',
+    color: ['#f23c0d'],
+    shape: [
+        [0, 0, 1],
+        [1, 1, 0],
+        [0, 0, 0]
+    ]
+}];
 gameInit({
     control: {
         left: {
@@ -949,7 +1020,7 @@ gameInit({
             execute: () => {
                 pause();
             },
-            key: 'Enter',
+            key: 'enter',
             pressed: 0,
             buffer: 0
         },
@@ -974,15 +1045,16 @@ gameInit({
         width: 10,
         height: 20
     },
-    minos: [...standardMinos],
+    minos: [...triMinos],
     garbage: {
         color: '#999999',
-        lines: 5,
-        holes: 6,
-        erode: 2
+        lines: 0,
+        holes: 8,
+        erode: 1
     },
     enableHold: true,
-    nextAmount: 6,
+    nextAmount: 5,
     pieceShadows: true,
-    algorithm: 'nes'
+    algorithm: 'nes',
+    heavenChance: 25
 });

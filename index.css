@@ -195,14 +195,15 @@ ul, ol {
 }
 
 #board-wrapper {
+    border: #222 solid 2px;
     width: 250px;
     height: 500px;
+    border-radius: 6px;
 }
 
 #board {
     background-color: #333333;
-    border: #222 solid 2px;
-    border-radius: 5px;
+    border-radius: 3px;
     margin: auto;
 }
 
@@ -214,16 +215,17 @@ ul, ol {
 
 #pause {
     border-radius: 5px;
+    height: 100%;
     display: none;
 }
 
 #pause-text {
-    text-align: center;
     font-size: 30px !important;
-    top: 50%;
-    translate: 0 -50%;
-    position:  relative;
     user-select: none;
+    text-align: center;
+    margin: auto !important;
+    height: 100%;
+    line-height: 470px;
 }
 
 .game-mino {
@@ -240,23 +242,18 @@ ul, ol {
     justify-content: center;
 }
 
-#left-wrapper {
-    
-    margin: 0 10px;
-}
-
+#left-wrapper,
 #right-wrapper {
     margin: 0 10px;
+    width: 90px;
 }
 
-#next-main,
-#hold-main {
+.piece-holder {
     border-radius: 5px;
     background-color: #333333;
     border: #222 solid 2px;
-    width: 80px;
-    height: 80px;
-    margin: -2px;
+    width: 76px;
+    height: 76px;
     padding: 5px;
 }
 
@@ -276,10 +273,10 @@ ul, ol {
 }
 
 .next-display {
-    height: 60px;
-    width: 60px;
-    padding: 8px;
     margin: auto;
+    height: 76px;
+    padding: 5px 0px;
+    width: 76px;
 }
 
 .game-row {
@@ -317,4 +314,12 @@ ul, ol {
     padding: 7px 0px;
     font-size: 20px;
     font-weight: bold;
+}
+
+#next-holder {
+    border-radius: 5px;
+    background-color: #333333;
+    border: #222 solid 2px;
+    width: 86px;
+    height: auto;
 }
