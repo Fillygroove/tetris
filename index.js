@@ -1,6 +1,7 @@
 let board = document.getElementById('board');
 let divBoard = document.getElementById('game-board');
 let pauseDiv = document.getElementById('pause');
+let gameOverScreen = document.getElementById('game-over');
 let nextDiv;
 let holdDiv;
 let gameLoop;
@@ -143,6 +144,7 @@ class Piece {
 
                 for (let i = 0; i < config.dims.width - 1; i++) {
                     let row = new Array(config.dims.width).fill(0);
+
                     if (firstRowWithPieces + i < config.dims.height && indices.length < config.dims.width) {
                         for (let j = 0; j < indices.length; j++) {
                             if (game.board[firstRowWithPieces + i][indices[j]]) {
@@ -151,8 +153,10 @@ class Piece {
                             } else row[indices[j]] = 1;
                         }
                     }
+
                     out.push(row);
                 }
+
                 return out;
             })();
 
@@ -411,6 +415,12 @@ function pause() {
     }
 }
 
+function endGame() {
+    clearInterval(gameLoop);
+    gameOverScreen.style.display = 'initial';
+    if (game.pause) pause();
+}
+
 function resetGame() {
     // Change the aspect ratio of the board based on the width and height
     if (config.dims.width / config.dims.height > 2) {
@@ -528,10 +538,6 @@ function resetGame() {
         leftWrapper.append(holdDiv);
     }
 
-/*    let levelDiv = document.createElement('div');
-    levelDiv.id = 'level';
-    leftWrapper.append(levelDiv);
-*/
     let rightWrapper = document.getElementById('right-wrapper');
     rightWrapper.innerHTML = '';
 
@@ -552,6 +558,8 @@ function resetGame() {
 
         rightWrapper.append(nextDiv);
     }
+
+    gameOverScreen.style.display = 'none';
 
     nextLevel();
 }
@@ -576,7 +584,7 @@ function gameInit(options = config) {
         } else {
             if (game.linesCleared.length == 0) {
                 // If the game is completed, stop the loop
-                if (game.done) clearInterval(gameLoop);
+                if (game.done) endGame();
 
                 if (!game.piece.exists()) {
                     game.piece.set(game.next.shift());
@@ -969,6 +977,7 @@ let triMinos = [{
         [0, 0, 0]
     ]
 }];
+
 gameInit({
     control: {
         left: {
@@ -1045,10 +1054,10 @@ gameInit({
         width: 10,
         height: 20
     },
-    minos: [...triMinos],
+    minos: [...standardMinos],
     garbage: {
         color: '#999999',
-        lines: 0,
+        lines: 5,
         holes: 8,
         erode: 1
     },
@@ -1056,5 +1065,5 @@ gameInit({
     nextAmount: 5,
     pieceShadows: true,
     algorithm: 'nes',
-    heavenChance: 25
+    heavenChance: 0
 });
