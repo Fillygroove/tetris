@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fillygroove | Tetris Beta</title>
+    <title>Fillygroove | Tetris Alpha</title>
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
@@ -17,8 +17,8 @@
         <div id="game">
 
             <div id="score-wrapper">
-                <div id="level"></div>
-                <div id="score"></div>
+                <div id="level">Lvl 0</div>
+                <div id="score">Score: 069420</div>
             </div>
 
             <div id="game-wrapper">
@@ -31,19 +31,38 @@
                     <div id="board">
 
                         <div id="game-over">
-                            <div id="game-over-text">
+                            <div id="div-mid-text">
                                 Game Over!
-                                <div id="restart-button" onclick="gameInit()">
+                                <div id="div-button" onclick="gameInit()">
                                     Restart
+                                </div>
+                                <div id="div-button" onclick="quit()">
+                                    Quit
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="pause">
+                            <div id="div-mid-text">
+                                Pause!
+                                <div id="div-button" onclick="gameInit()">
+                                    Restart
+                                </div>
+                                <div id="div-button" onclick="quit()">
+                                    Quit
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="main-menu">
+                            <div id="div-mid-text">
+                                <div id="div-button" onclick="gameInit()">
+                                    Play
                                 </div>
                             </div>
                         </div>
 
                         <div id="game-board"></div>
-
-                        <div id="pause">
-                            <p id="div-text">Paused!</p>
-                        </div>
 
                     </div>
 
@@ -57,6 +76,7 @@
         </div>
 
         <p>x.x.x (yy-dd-mm)</p>
+        <p>1.0.0 (22-09-21) - Tweaked all of the screens to allow for a main menu and a way to quit the game; Effectively, the game is now in alpha</p>
         <p>0.0.25 (22-09-20) - There is now a game over screen.</p>
         <p>0.0.24 (22-09-20) - Temporarily switched the gamemode to triminoes and added a "Heaven" piece that fits a board clear perfectly</p>
         <p>0.0.23 (22-09-20) - Fixed multiple div issues and reduced the score padding from 8 to 6</p>
@@ -73,15 +93,15 @@
         <p>0.0.12 (22-09-13) - Removed every debugging piece</p>
         <p>0.0.11 (22-09-13) - Temporarily added literally every debugging piece</p>
         <p>0.0.10 (22-09-13) - Temporarily added a K piece (made by Drifter) for testing purposes</p>
-        <p>0.0.09 (22-09-13) - Added support for custom board sizes and multi-colored pieces</p>
-        <p>0.0.08 (22-09-12) - Fixed pausing</p>
-        <p>0.0.07 (22-09-11) - Fixed piece drawing errors</p>
-        <p>0.0.06 (22-09-11) - Re-did how the drawing function works to be less intensive</p>
-        <p>0.0.05 (22-09-09) - You can now pause the game with Enter</p>
-        <p>0.0.04 (22-09-09) - Hard drops are now buffered, meaning that holding the key won't mess you up when the next piece drops</p>
-        <p>0.0.03 (22-09-09) - Hard drops are now possible and added an unusable version of the o piece that can o-spin</p>
-        <p>0.0.02 (22-09-09) - Made block placement more forgiving and fixed line clear errors</p>
-        <p>0.0.01 (22-09-09) - Released this buggy mess</p>
+        <p>0.0.9 (22-09-13) - Added support for custom board sizes and multi-colored pieces</p>
+        <p>0.0.8 (22-09-12) - Fixed pausing</p>
+        <p>0.0.7 (22-09-11) - Fixed piece drawing errors</p>
+        <p>0.0.6 (22-09-11) - Re-did how the drawing function works to be less intensive</p>
+        <p>0.0.5 (22-09-09) - You can now pause the game with Enter</p>
+        <p>0.0.4 (22-09-09) - Hard drops are now buffered, meaning that holding the key won't mess you up when the next piece drops</p>
+        <p>0.0.3 (22-09-09) - Hard drops are now possible and added an unusable version of the o piece that can o-spin</p>
+        <p>0.0.2 (22-09-09) - Made block placement more forgiving and fixed line clear errors</p>
+        <p>0.0.1 (22-09-09) - Released this buggy mess</p>
     </div>
     <script src="index.js"></script>
 </body>

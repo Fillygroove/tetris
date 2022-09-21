@@ -2,12 +2,19 @@ let board = document.getElementById('board');
 let divBoard = document.getElementById('game-board');
 let pauseDiv = document.getElementById('pause');
 let gameOverScreen = document.getElementById('game-over');
+let mainMenu = document.getElementById('main-menu');
+let leftWrapper = document.getElementById('left-wrapper');
+let rightWrapper = document.getElementById('right-wrapper');
 let nextDiv;
 let holdDiv;
 let gameLoop;
 let game;
-let config;
 let blankRow;
+
+window.onkeydown = (e) => {
+    console.log(e.key);
+    return e.key != ' ' && e.key != 'ArrowUp' && e.key != 'ArrowDown';
+}
 
 document.addEventListener("keydown", (e) => {
     for (let key in config.control) {
@@ -361,12 +368,9 @@ function drawHold() {
 function getSpeed() {
     switch (config.algorithm) {
         case 'nes':
-            if (game.level / 8 <= 1) return -5 * game.level + 48;
-            if (game.level == 9) return 6;
-            if ((game.level - 10) / 2 <= 1) return 5;
-            if ((game.level - 13) / 2 <= 1) return 4;
-            if ((game.level - 16) / 2 <= 1) return 3;
-            if ((game.level - 19) / 9 <= 1) return 2;
+            if (game.level < 9) return -5 * game.level + 48;
+            if (game.level < 19) return 5 - Math.floor(((game.level - 10) / 3));
+            if (game.level < 29) return 2;
             return 1;
     }
 }
@@ -395,7 +399,6 @@ function nextLevel() {
 
 function pause() {
     if (!game.paused) {
-        divBoard.style.display = 'none';
         pauseDiv.style.display = 'initial';
 
         if (nextDiv) {
@@ -407,12 +410,20 @@ function pause() {
 
         game.paused = true;
     } else {
-        divBoard.style.display = '';
         pauseDiv.style.display = 'none';
         drawNext();
         drawHold();
         game.paused = false;    
     }
+}
+
+function quit() {
+    gameOverScreen.style.display = 'none';
+    pauseDiv.style.display = 'none';
+    mainMenu.style.display = 'initial';
+    divBoard.innerHTML = '';
+    leftWrapper.innerHTML = '';
+    rightWrapper.innerHTML = '';
 }
 
 function endGame() {
@@ -422,6 +433,9 @@ function endGame() {
 }
 
 function resetGame() {
+    if (game && game.paused) game.paused = false;
+    pauseDiv.style.display = 'none';
+
     // Change the aspect ratio of the board based on the width and height
     if (config.dims.width / config.dims.height > 2) {
         board.style.width = `100%`;
@@ -527,7 +541,6 @@ function resetGame() {
         speed: undefined
     };
 
-    let leftWrapper = document.getElementById('left-wrapper');
     leftWrapper.innerHTML = '';
 
     // If hold is enabled, add it
@@ -538,7 +551,6 @@ function resetGame() {
         leftWrapper.append(holdDiv);
     }
 
-    let rightWrapper = document.getElementById('right-wrapper');
     rightWrapper.innerHTML = '';
 
     // If next count is above 0, add next piece indicators
@@ -560,6 +572,7 @@ function resetGame() {
     }
 
     gameOverScreen.style.display = 'none';
+    mainMenu.style.display = 'none';
 
     nextLevel();
 }
@@ -943,6 +956,28 @@ let miscMinos = [{
         [1, 1, 1, 1],
         [0, 1, 0, 1]
     ]
+}, {
+    name: 'C',
+    color: ['#00F0F1'],
+    shape: [
+        [1, 0, 1],
+        [1, 1, 1],
+        [0, 0, 0]
+    ]
+}, {
+    name: 'Sweetpea',
+    color: ['#67764D'],
+    shape: [
+        [1],
+    ]
+}, {
+    name: '',
+    color: ['#f23c0d'],
+    shape: [
+        [0, 0, 1],
+        [0, 1, 0],
+        [1, 0, 0]
+    ]
 }];
 let triMinos = [{
     name: '',
@@ -978,7 +1013,7 @@ let triMinos = [{
     ]
 }];
 
-gameInit({
+let config = {
     control: {
         left: {
             execute: () => {
@@ -1057,7 +1092,7 @@ gameInit({
     minos: [...standardMinos],
     garbage: {
         color: '#999999',
-        lines: 5,
+        lines: 0,
         holes: 8,
         erode: 1
     },
@@ -1066,4 +1101,6 @@ gameInit({
     pieceShadows: true,
     algorithm: 'nes',
     heavenChance: 0
-});
+};
+
+// gameInit(config);

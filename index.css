@@ -48,7 +48,7 @@ p {
     width: 100%;
     display: flex;
     user-select: none;
-    z-index: 1;
+    z-index: 2;
 }
 
 #topbar div {
@@ -213,12 +213,6 @@ ul, ol {
     width: 100%;
 }
 
-#pause {
-    border-radius: 5px;
-    height: 100%;
-    display: none;
-}
-
 #div-text {
     font-size: 30px !important;
     user-select: none;
@@ -317,7 +311,9 @@ ul, ol {
     height: auto;
 }
 
-#game-over {
+#pause,
+#game-over,
+#main-menu {
     display: none;
     border-radius: 5px;
     background-color: #33333380;
@@ -327,7 +323,16 @@ ul, ol {
     height: 500px;
 }
 
-#game-over-text {
+#pause,
+#main-menu {
+    background-color: #333333;
+}
+
+#main-menu {
+    display: initial;
+}
+
+#div-mid-text {
     position: absolute;
     left: 50%;
     transform: translateX(-50%) translateY(-50%);
@@ -338,7 +343,7 @@ ul, ol {
     text-align: center;
     user-select: none;
 }
-#restart-button {
+#div-button {
     background-color: #333;
     text-align: center;
     width: 90px;
