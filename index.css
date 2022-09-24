@@ -343,12 +343,13 @@ ul, ol {
     text-align: center;
     user-select: none;
 }
+
 #div-button {
-    background-color: #333;
+    background-color: #A769B1;
     text-align: center;
     width: 90px;
-    margin: auto;
-    border: #222 2px solid;
+    margin: 5px auto;
+    border: #704676 2px solid;
     border-radius: 5px;
     cursor: pointer;
 }

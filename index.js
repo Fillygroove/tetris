@@ -1,18 +1,12 @@
-let board = document.getElementById('board');
 let divBoard = document.getElementById('game-board');
-let pauseDiv = document.getElementById('pause');
-let gameOverScreen = document.getElementById('game-over');
-let mainMenu = document.getElementById('main-menu');
 let leftWrapper = document.getElementById('left-wrapper');
 let rightWrapper = document.getElementById('right-wrapper');
-let nextDiv;
 let holdDiv;
 let gameLoop;
 let game;
 let blankRow;
 
 window.onkeydown = (e) => {
-    console.log(e.key);
     return e.key != ' ' && e.key != 'ArrowUp' && e.key != 'ArrowDown';
 }
 
@@ -121,10 +115,12 @@ class Piece {
         this.indices = undefined;
         this.center = undefined;
         this.index = undefined;
+        this.shadow = undefined;
+        game.pieceSwitched = false;
     }
 
     exists() {
-        return this.indices != undefined && this.center != undefined && this.index != undefined;  
+        return this.indices != undefined && this.center != undefined && this.index != undefined && this.shadow != undefined;  
     }
 
     set(minoID) {
@@ -352,7 +348,7 @@ function drawInDiv(div, minoID) {
 }
 
 function drawNext() {
-    if (nextDiv) {
+    if (config.nextAmount) {
         for (let i = 0; i < config.nextAmount; i++) {
             drawInDiv(document.getElementById(`next${i}`), game.next[i]);
         }
@@ -360,7 +356,7 @@ function drawNext() {
 }
 
 function drawHold() {
-    if (holdDiv && game.hold != undefined) {
+    if (config.enableHold && game.hold != undefined) {
         drawInDiv(holdDiv, game.hold);
     }
 }
@@ -393,24 +389,27 @@ function nextLevel() {
     game.level++;
     game.speed = getSpeed();
     game.linesClearedOverall = 0;
-    document.getElementById('level').innerHTML = `Lvl ${game.level}&nbsp;`;
+    document.getElementById('level').innerHTML = `Lvl ${game.level}`;
     updateScore();
+}
+
+function setDisplay(div, display) {
+    document.getElementById(div).style.display = display;
 }
 
 function pause() {
     if (!game.paused) {
-        pauseDiv.style.display = 'initial';
+        setDisplay('pause', 'initial');
 
-        if (nextDiv) {
-            for (let i = 0; i < config.nextAmount; i++) {
-                document.getElementById(`next${i}`).innerHTML = '';
-            }
+        for (let i = 0; i < config.nextAmount; i++) {
+            document.getElementById(`next${i}`).innerHTML = '';
         }
+
         if (holdDiv) holdDiv.innerHTML = '';
 
         game.paused = true;
     } else {
-        pauseDiv.style.display = 'none';
+        setDisplay('pause', 'none');
         drawNext();
         drawHold();
         game.paused = false;    
@@ -418,9 +417,9 @@ function pause() {
 }
 
 function quit() {
-    gameOverScreen.style.display = 'none';
-    pauseDiv.style.display = 'none';
-    mainMenu.style.display = 'initial';
+    setDisplay('pause', 'none');
+    setDisplay('game-over', 'none');
+    setDisplay('main-menu', 'initial');
     divBoard.innerHTML = '';
     leftWrapper.innerHTML = '';
     rightWrapper.innerHTML = '';
@@ -428,13 +427,14 @@ function quit() {
 
 function endGame() {
     clearInterval(gameLoop);
-    gameOverScreen.style.display = 'initial';
-    if (game.pause) pause();
+    setDisplay('pause', 'none');
+    setDisplay('game-over', 'initial');
 }
 
 function resetGame() {
-    if (game && game.paused) game.paused = false;
-    pauseDiv.style.display = 'none';
+    setDisplay('pause', 'none');
+    setDisplay('game-over', 'none');
+    setDisplay('main-menu', 'none');
 
     // Change the aspect ratio of the board based on the width and height
     if (config.dims.width / config.dims.height > 2) {
@@ -530,6 +530,7 @@ function resetGame() {
             }
             return out;
         })(),
+        pieceSwitched: false,
         hold: undefined,
         done: undefined,
         paused: false,
@@ -555,7 +556,7 @@ function resetGame() {
 
     // If next count is above 0, add next piece indicators
     if (config.nextAmount) {
-        nextDiv = document.createElement('div');
+        let nextDiv = document.createElement('div');
         nextDiv.id = 'next-holder';
 
         for (let i = 0; i < config.nextAmount; i++) {
@@ -570,9 +571,6 @@ function resetGame() {
 
         rightWrapper.append(nextDiv);
     }
-
-    gameOverScreen.style.display = 'none';
-    mainMenu.style.display = 'none';
 
     nextLevel();
 }
@@ -1070,7 +1068,7 @@ let config = {
         },
         hold: {
             execute: () => {
-                if (config.enableHold) {
+                if (config.enableHold && !game.pieceSwitched) {
                     let holdTemp = game.hold;
                     game.hold = game.piece.index;
                     drawHold();
@@ -1078,6 +1076,8 @@ let config = {
                     
                     if (holdTemp == undefined) game.piece.remove();
                     else game.piece.set(holdTemp);
+
+                    game.pieceSwitched = true;
                 }
             },
             key: 'q',
@@ -1102,5 +1102,3 @@ let config = {
     algorithm: 'nes',
     heavenChance: 0
 };
-
-// gameInit(config);
