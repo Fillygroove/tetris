@@ -1077,7 +1077,7 @@ let config = {
                     if (holdTemp == undefined) game.piece.remove();
                     else game.piece.set(holdTemp);
 
-                    game.pieceSwitched = true;
+                    if (config.switchOnce) game.pieceSwitched = true;
                 }
             },
             key: 'q',
@@ -1100,5 +1100,6 @@ let config = {
     nextAmount: 5,
     pieceShadows: true,
     algorithm: 'nes',
-    heavenChance: 0
+    heavenChance: 0,
+    switchOnce: true
 };
