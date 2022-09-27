@@ -313,6 +313,7 @@ ul, ol {
 
 #pause,
 #game-over,
+#options,
 #main-menu {
     display: none;
     border-radius: 5px;
@@ -324,7 +325,8 @@ ul, ol {
 }
 
 #pause,
-#main-menu {
+#main-menu,
+#options {
     background-color: #333333;
 }
 

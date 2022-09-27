@@ -120,7 +120,7 @@ class Piece {
     }
 
     exists() {
-        return this.indices != undefined && this.center != undefined && this.index != undefined && this.shadow != undefined;  
+        return this.indices != undefined && this.center != undefined && this.index != undefined;  
     }
 
     set(minoID) {
@@ -200,90 +200,94 @@ class Piece {
     }
 
     rotate(dir, check = 0) { // this could be optimized very easily
-        // If I just redefined the piece indices, the code breaks; I do not know why. 
-        let newIndices = [];
+        if (this.exists()) {
+            // If I just redefined the piece indices, the code breaks; I do not know why. 
+            let newIndices = [];
 
-        for (let i = 0; i < this.indices.length; i++) {
-            // Move the x and y positions of the indices to (0, 0) instead of their current center
-            let y = this.indices[i].col - this.center[0];
-            let x = this.indices[i].row - this.center[1];
-            
-            // Calculate how far away they are from the center and what angle they're at from the center
-            let scale = Math.sqrt(y * y + x * x);
-            let angle = Math.atan2(x, y);
+            for (let i = 0; i < this.indices.length; i++) {
+                // Move the x and y positions of the indices to (0, 0) instead of their current center
+                let y = this.indices[i].col - this.center[0];
+                let x = this.indices[i].row - this.center[1];
+                
+                // Calculate how far away they are from the center and what angle they're at from the center
+                let scale = Math.sqrt(y * y + x * x);
+                let angle = Math.atan2(x, y);
 
-            // Rotate the x and the y pieces clockwise or widdershins
-            let indexArray = {
-                col: Math.round(scale * Math.cos(angle - dir * Math.PI / 2) + this.center[0]), 
-                row: Math.round(scale * Math.sin(angle - dir * Math.PI / 2) + this.center[1]),
-                color: this.indices[i].color
-            };
+                // Rotate the x and the y pieces clockwise or widdershins
+                let indexArray = {
+                    col: Math.round(scale * Math.cos(angle - dir * Math.PI / 2) + this.center[0]), 
+                    row: Math.round(scale * Math.sin(angle - dir * Math.PI / 2) + this.center[1]),
+                    color: this.indices[i].color
+                };
 
-            if (
-                // The attempted rotation location exists...
-                game.board[indexArray.col][indexArray.row] ||
-                // or if that location is out of bounds...
-                indexArray.col < 0 || indexArray.col > config.dims.height -1 ||
-                indexArray.row < 0 || indexArray.row > config.dims.width -1
-            ) {
-                // Do not rotate
-                // Implement TTC SRS by adjusting the centerpoint, allowing for four extra checks
-                return;
+                if (
+                    // The attempted rotation location exists...
+                    game.board[indexArray.col][indexArray.row] ||
+                    // or if that location is out of bounds...
+                    indexArray.col < 0 || indexArray.col > config.dims.height -1 ||
+                    indexArray.row < 0 || indexArray.row > config.dims.width -1
+                ) {
+                    // Do not rotate
+                    // Implement TTC SRS by adjusting the centerpoint, allowing for four extra checks
+                    return;
+                }
+
+                newIndices.push(indexArray);
             }
 
-            newIndices.push(indexArray);
+            this.erase();
+            this.indices = newIndices;
+            this.draw();
         }
-
-        this.erase();
-        this.indices = newIndices;
-        this.draw();
     }
 
     move(x, y) {
-        let newIndices = [];
-    
-        for (let i = 0; i < this.indices.length; i++) {
-            let newY = this.indices[i].col + y;
-            let newX = this.indices[i].row + x;
-    
-            if (!game.board[newY] || game.board[newY][newX]) {
-                if (y != 0) {
-                    if (game.placeBuffer) {
-                        for (let i = 0; i < this.indices.length; i++) {
-                            game.board[this.indices[i].col][this.indices[i].row] = 1;
-                            if (!game.board[this.indices[i].col].includes(0)) {
-                                if (!game.linesCleared.includes(this.indices[i].col)) {
-                                    game.linesCleared.push(this.indices[i].col);
+        if (this.exists()) {
+            let newIndices = [];
+
+            for (let i = 0; i < this.indices.length; i++) {
+                let newY = this.indices[i].col + y;
+                let newX = this.indices[i].row + x;
+        
+                if (!game.board[newY] || game.board[newY][newX]) {
+                    if (y != 0) {
+                        if (game.placeBuffer) {
+                            for (let i = 0; i < this.indices.length; i++) {
+                                game.board[this.indices[i].col][this.indices[i].row] = 1;
+                                if (!game.board[this.indices[i].col].includes(0)) {
+                                    if (!game.linesCleared.includes(this.indices[i].col)) {
+                                        game.linesCleared.push(this.indices[i].col);
+                                    }
                                 }
                             }
+                            this.remove();
+                            game.placeBuffer = 0;
+                        } else {
+                            game.placeBuffer = 1;
                         }
-                        this.remove();
-                        game.placeBuffer = 0;
-                    } else {
-                        game.placeBuffer = 1;
                     }
+                    return;
+                } else if (newX < 0 || newX > config.dims.width - 1) {
+                    return;
                 }
-                return;
-            } else if (newX < 0 || newX > config.dims.width - 1) {
-                return;
+        
+                newIndices.push({
+                    col: newY,
+                    row: newX,
+                    color: this.indices[i].color
+                });
             }
-    
-            newIndices.push({
-                col: newY,
-                row: newX,
-                color: this.indices[i].color
-            });
-        }
-        
-        this.erase();
+            
+            this.erase();
 
-        if (game.placeBuffer) game.placeBuffer = 0;
-    
-        this.indices = newIndices;
-        this.center[0] += y;
-        this.center[1] += x;
+            if (game.placeBuffer) game.placeBuffer = 0;
         
-        this.draw();
+            this.indices = newIndices;
+            this.center[0] += y;
+            this.center[1] += x;
+            
+            this.draw();
+        }
     }
 }
 
@@ -363,7 +367,7 @@ function drawHold() {
 
 function getSpeed() {
     switch (config.algorithm) {
-        case 'nes':
+        case 'nesNTSC':
             if (game.level < 9) return -5 * game.level + 48;
             if (game.level < 19) return 5 - Math.floor(((game.level - 10) / 3));
             if (game.level < 29) return 2;
@@ -372,12 +376,9 @@ function getSpeed() {
 }
 
 function getScoreFromLines() {
-    switch (config.algorithm) {
-        case 'nes':
-            if (game.linesCleared.length / 3 <= 1) {
-                return 200 * game.linesCleared.length - 100;
-            } else return 800;
-    }
+    if (game.linesCleared.length / 3 <= 1) {
+        return 200 * game.linesCleared.length - 100;
+    } else return 800;
 }
 
 function updateScore() {
@@ -395,6 +396,16 @@ function nextLevel() {
 
 function setDisplay(div, display) {
     document.getElementById(div).style.display = display;
+}
+
+function toggleDiv(div) {
+    if (document.getElementById(div).style.display == 'initial') {
+        setDisplay('main-menu', 'initial');
+        setDisplay(div, 'none');
+    } else {
+        setDisplay('main-menu', 'none');
+        setDisplay(div, 'initial');    
+    }
 }
 
 function pause() {
@@ -976,6 +987,38 @@ let miscMinos = [{
         [0, 1, 0],
         [1, 0, 0]
     ]
+}, {
+    name: 'Y',
+    color: ['#EF2029', '#5965AF', '#F7D308'],
+    shape: [
+        [0, 1, 0],
+        [0, 1, 0],
+        [2, 0, 3]
+    ]
+}, {
+    name: 'Long T',
+    color: ['#B31564'],
+    shape: [
+        [0, 1, 0],
+        [0, 1, 0],
+        [1, 1, 1]
+    ]
+}, {
+    name: 'Zess',
+    color: ['#FFFFFF'],
+    shape: [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1],
+        [0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0],
+        [1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    ]
 }];
 let triMinos = [{
     name: '',
@@ -1099,7 +1142,7 @@ let config = {
     enableHold: true,
     nextAmount: 5,
     pieceShadows: true,
-    algorithm: 'nes',
-    heavenChance: 0,
+    algorithm: 'nesNTSC',
+    heavenChance: 1,
     switchOnce: true
 };
