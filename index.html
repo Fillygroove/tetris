@@ -27,22 +27,11 @@
                 </div>
 
                 <div id="board-wrapper">
-
                     <div id="board">
 
-                        <div id="game-over">
-                            <div id="div-mid-text">
-                                Game Over!
-                                <div id="div-button" onclick="gameInit()">
-                                    Restart
-                                </div>
-                                <div id="div-button" onclick="quit()">
-                                    Quit
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="pause">
+                        <div id="game-board"></div>
+                        
+                        <div class="screen" id="pause">
                             <div id="div-mid-text">
                                 Pause!
                                 <div id="div-button" onclick="gameInit()">
@@ -54,30 +43,86 @@
                             </div>
                         </div>
 
-                        <div id="options">
+                        <div class="screen" id="game-over">
                             <div id="div-mid-text">
-                                Coming soon to a buggy tetris clone near you
-                                <div id="div-button" onclick="toggleDiv('options')">
-                                    Back
+                                Game Over!
+                                <div id="div-button" onclick="gameInit()">
+                                    Restart
+                                </div>
+                                <div id="div-button" onclick="quit()">
+                                    Quit
                                 </div>
                             </div>
                         </div>
-
-                        <div id="main-menu">
+ 
+                        <div class="screen" id="main-menu">
                             <div id="div-mid-text">
                                 <div id="div-button" onclick="gameInit()">
                                     Play
                                 </div>
-                                <div id="div-button" onclick="toggleDiv('options')">
+                                <div id="div-button" onclick="showOptions()">
                                     Options
                                 </div>
                             </div>
                         </div>
 
-                        <div id="game-board"></div>
+                        <div class="screen" id="options">
+                            <div id="div-mid-text">
+
+                                <div class="options-div">
+                                    <p class="option-text">Width:</p>
+                                    <input type="number" id="width" class="number" step="1" min="6" max="20">
+                                </div>
+
+                                <div class="options-div">
+                                    <p class="option-text">Height:</p>
+                                    <input type="number" id="height" class="number" step="1" min="12" max="40">
+                                </div>
+
+
+                                <div class="options-div">
+                                    <p class="option-text">Next Amount:</p>
+                                    <input type="number" id="nextAmount" class="number" step="1" min="0" max="5">
+                                </div>
+
+                                <div class="options-div">
+                                    <p class="option-text">Enable Hold:</p>
+                                    <input type="checkbox" id="enableHold" class="checkbox">
+                                </div>
+                                
+                                <div class="options-div">
+                                    <p class="option-text">Switch Once:</p>
+                                    <input type="checkbox" id="switchOnce" class="checkbox">
+                                </div>
+
+                                <hr/>
+
+                                <div class="options-div" title="Originates from xkcd 888">
+                                    <p class="option-text">Heaven Block Chance:</p>
+                                    <input type="range" id="heavenChance" class="number" step="1" min="0" max="100">
+                                </div>
+
+                                <div class="options-div">
+                                    <p class="option-text">Piece Shadows:</p>
+                                    <input type="checkbox" id="pieceShadows" class="checkbox">
+                                </div>
+
+                                <hr/>
+                                    
+                                <div class="options-div">
+                                    <p class="option-text">Garbage Height:</p>
+                                    <input type="number" id="garbageLines" class="number" step="1" min="0" max="12">
+                                </div>
+
+                                <p>Unfinished - More options coming soon</p>
+
+                                <div id="div-button" onclick="saveOptions('options')">
+                                    Save & Back
+                                </div>
+                            </div>
+                        </div>
 
                     </div>
-
                 </div>
 
                 <div id="right-wrapper">
@@ -88,6 +133,7 @@
         </div>
 
         <p>x.x.x (yy-dd-mm)</p>
+        <p>1.0.4 (22-09-29) - Added general customization options after struggling with fixing up divs</p>
         <p>1.0.3 (22-09-27) - General bug fixes</p>
         <p>1.0.2 (22-09-24) - Added the old switching function as a future customization option</p>
         <p>1.0.1 (22-09-24) - Fixed a bug with holding where you could switch between pieces infinitely; Buttons now have top and bottom padding and different colors</p>

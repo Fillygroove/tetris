@@ -195,16 +195,20 @@ ul, ol {
 }
 
 #board-wrapper {
-    border: #222 solid 2px;
     width: 250px;
     height: 500px;
     border-radius: 6px;
+    border: #222 solid 2px;
+    display: flex;
 }
 
 #board {
     background-color: #333333;
     border-radius: 3px;
     margin: auto;
+    position: relative;
+    height: 100%;
+    width: 100%;
 }
 
 #game-board {
@@ -311,23 +315,20 @@ ul, ol {
     height: auto;
 }
 
-#pause,
-#game-over,
-#options,
-#main-menu {
+.screen {
     display: none;
     border-radius: 5px;
-    background-color: #33333380;
+    background-color: #333333;
     position: absolute;
-    width: 250px;
+    width: 100%;
+    height: 100%;
     z-index: 1;
-    height: 500px;
+    top: 0;
+    left: 0;
 }
 
-#pause,
-#main-menu,
-#options {
-    background-color: #333333;
+#game-over {
+    background-color: #33333380;
 }
 
 #main-menu {
@@ -341,7 +342,7 @@ ul, ol {
     top: 50%;
     font-weight: bold;
     font-size: 22px;
-    width: 200px;
+    width: 100%;
     text-align: center;
     user-select: none;
 }
@@ -354,4 +355,24 @@ ul, ol {
     border: #704676 2px solid;
     border-radius: 5px;
     cursor: pointer;
+}
+
+.options-div {
+    display: flex;
+    height: 20px;
+}
+
+.number {
+    height: 10px;
+    margin: auto 9px auto auto;
+    width: 50px;
+    float: right;
+}
+
+.checkbox {
+  margin: auto 9px auto auto;
+}
+
+.option-text {
+    margin: 0 0 0 9px !important;
 }

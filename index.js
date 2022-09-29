@@ -6,6 +6,15 @@ let gameLoop;
 let game;
 let blankRow;
 
+for (let input of document.getElementsByTagName('input')) {
+    if (input.min && input.max) {
+        input.oninput = () => {
+            if (Number(input.value) < Number(input.min)) input.value = input.min;
+            if (Number(input.value) > Number(input.max)) input.value = input.max;
+        }
+    }
+}
+
 window.onkeydown = (e) => {
     return e.key != ' ' && e.key != 'ArrowUp' && e.key != 'ArrowDown';
 }
@@ -408,6 +417,36 @@ function toggleDiv(div) {
     }
 }
 
+function showOptions() {
+    toggleDiv('options');
+
+    document.getElementById('width').value = config.dims.width;
+    document.getElementById('height').value = config.dims.height;
+    document.getElementById('heavenChance').value = config.heavenChance;
+    document.getElementById('nextAmount').value = config.nextAmount;
+    document.getElementById('enableHold').checked = config.enableHold;
+    document.getElementById('pieceShadows').checked = config.pieceShadows;
+    document.getElementById('switchOnce').checked = config.switchOnce;
+    document.getElementById('garbageLines').value = config.garbage.lines;
+}
+
+function saveOptions() {
+    toggleDiv('options');
+
+    config.dims.width = Number(document.getElementById('width').value);
+    config.dims.height = Number(document.getElementById('height').value);
+    config.heavenChance = Number(document.getElementById('heavenChance').value);
+    config.nextAmount = Number(document.getElementById('nextAmount').value);
+    config.enableHold = document.getElementById('enableHold').checked;
+    config.pieceShadows = document.getElementById('pieceShadows').checked;
+    config.switchOnce = document.getElementById('switchOnce').checked;
+    config.garbage.lines = Number(document.getElementById('garbageLines').value);
+}
+
+function checkInput() {
+    console.log('a')
+}
+
 function pause() {
     if (!game.paused) {
         setDisplay('pause', 'initial');
@@ -428,16 +467,22 @@ function pause() {
 }
 
 function quit() {
+    clearInterval(gameLoop);
+
     setDisplay('pause', 'none');
     setDisplay('game-over', 'none');
     setDisplay('main-menu', 'initial');
     divBoard.innerHTML = '';
     leftWrapper.innerHTML = '';
     rightWrapper.innerHTML = '';
+
+    document.getElementById('board').style.width = '100%';
+    document.getElementById('board').style.height = '100%';
 }
 
 function endGame() {
     clearInterval(gameLoop);
+
     setDisplay('pause', 'none');
     setDisplay('game-over', 'initial');
 }
@@ -448,7 +493,7 @@ function resetGame() {
     setDisplay('main-menu', 'none');
 
     // Change the aspect ratio of the board based on the width and height
-    if (config.dims.width / config.dims.height > 2) {
+    if (config.dims.width / config.dims.height > 0.5) {
         board.style.width = `100%`;
         board.style.height = `${50 * config.dims.height / config.dims.width}%`;
     } else {
@@ -586,8 +631,7 @@ function resetGame() {
     nextLevel();
 }
 
-function gameInit(options = config) {
-    config = options;
+function gameInit() {
     resetGame();
 
     if (gameLoop) clearInterval(gameLoop);
@@ -1143,6 +1187,6 @@ let config = {
     nextAmount: 5,
     pieceShadows: true,
     algorithm: 'nesNTSC',
-    heavenChance: 1,
+    heavenChance: 0,
     switchOnce: true
 };
